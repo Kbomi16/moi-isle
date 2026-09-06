@@ -1,3 +1,12 @@
+:root {
+  --sky: #9fd6ea;
+  --water: #4e9bb3;
+  --paper: #f4efe4;
+  --paper-edge: #d7c7a8;
+  --ink: #3d4a3c;
+  --ink-soft: #5c6b58;
+}
+
 html,
 body,
 #root {
@@ -5,5 +14,160 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: system-ui, sans-serif;
+}
+
+body {
+  color: var(--ink);
+  font-family: 'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif;
+  background: var(--sky);
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+.isle {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+.isle-stage {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.isle-stage:active {
+  cursor: grabbing;
+}
+
+.gate,
+.hud,
+.chat {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+.gate {
+  left: 50%;
+  bottom: 11vh;
+  display: flex;
+  gap: 0.45rem;
+  transform: translateX(-50%);
+  padding: 0.45rem 0.45rem 0.45rem 0.85rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 94%, white);
+  box-shadow: 0 10px 30px rgb(61 74 60 / 12%);
+}
+
+.gate input,
+.chat input {
+  width: 10.5rem;
+  padding: 0.35rem 0.15rem;
+  border: 0;
+  background: transparent;
+  outline: none;
+}
+
+.gate input::placeholder,
+.chat input::placeholder {
+  color: var(--ink-soft);
+}
+
+.gate button {
+  padding: 0.4rem 0.9rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+}
+
+.gate button:focus-visible,
+.gate input:focus-visible,
+.chat input:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.hud {
+  left: 1.1rem;
+  top: 1rem;
+}
+
+.hud-name,
+.hud-hint,
+.nametag,
+.bubble {
+  margin: 0;
+}
+
+.hud-name {
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+.hud-hint {
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.chat {
+  left: 50%;
+  bottom: 1.4rem;
+  transform: translateX(-50%);
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 94%, white);
+}
+
+.chat input {
+  width: 16rem;
+  text-align: center;
+}
+
+.actor-markup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bubble {
+  max-width: 12rem;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 10px 10px 10px 3px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.nametag {
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-shadow: 0 1px 0 rgb(244 239 228 / 80%);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

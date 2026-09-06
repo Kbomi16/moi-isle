@@ -11,8 +11,10 @@ Three.js로 만드는 소셜 마을.
 
 ## 지금 단계
 
-스캐폴드. 원형 바닥과 상자 마커만 있는 빈 섬이다.  
-캐릭터·걷기·대화·멀티플레이는 아직 없다.
+1차 MVP. 이름만 적으면 섬에 선다. WASD로 걷고, 파란 방문객에게 다가가면 말할 수 있다.  
+섬은 Kenney Pirate Kit(CC0) GLB로 야자·부두·물가를 조립했다. 실제 다른 사람 접속은 아직 없다.
+
+에셋 출처는 [credits](docs/credits.md)에 있다.
 
 구현 순서는 기획서 [15. 다음에 할 일](docs/기획서.md#15-다음에-할-일-구현-순서)을 따른다.
 
@@ -29,6 +31,12 @@ bun install
 bun run dev
 ```
 
+```bash
+bun test
+```
+
 ## Docs
 
 - [기획서](docs/기획서.md) — 무엇을 만들고, 무엇을 만들지 않는가
+- [에셋 출처](docs/credits.md) — 쓴 GLB와 라이선스
+- [1차 구현 계획](docs/superpowers/plans/2026-09-05-mvp-walk-meet-talk.md)
