@@ -1,7 +1,8 @@
 import { KeyboardControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useRef } from 'react'
+import { Suspense, useRef } from 'react'
 import type { PointerEvent, RefObject } from 'react'
+import { PCFSoftShadowMap } from 'three'
 import { COLORS } from '../world/constants.ts'
 import type { Pose } from '../world/constants.ts'
 import { DummyVisitor } from './DummyVisitor.tsx'
@@ -83,26 +84,34 @@ export function IsleCanvas({
       <KeyboardControls map={keyMap}>
         <Canvas
           shadows
-          camera={{ fov: 42, position: [18, 12, 18], near: 0.1, far: 120 }}
+          camera={{ fov: 42, position: [18, 12, 18], near: 0.1, far: 140 }}
+          gl={{ antialias: true, toneMappingExposure: 1.08 }}
+          onCreated={({ gl }) => {
+            gl.shadowMap.type = PCFSoftShadowMap
+          }}
         >
           <color attach="background" args={[COLORS.sky]} />
-          <fog attach="fog" args={[COLORS.sky, 32, 72]} />
-          <hemisphereLight args={['#fff1d6', '#6a9a58', 0.62]} />
-          <ambientLight intensity={0.28} />
+          <fog attach="fog" args={[COLORS.sky, 34, 78]} />
+          <hemisphereLight args={['#ffe7c4', '#6b8f4a', 0.72]} />
+          <ambientLight intensity={0.32} />
           <directionalLight
             castShadow
-            position={[14, 18, 8]}
-            intensity={1.35}
+            color="#fff4dc"
+            position={[12, 16, 7]}
+            intensity={1.55}
+            shadow-bias={-0.0004}
             shadow-mapSize={[2048, 2048]}
-            shadow-camera-left={-22}
-            shadow-camera-right={22}
-            shadow-camera-top={22}
-            shadow-camera-bottom={-22}
+            shadow-camera-left={-24}
+            shadow-camera-right={24}
+            shadow-camera-top={24}
+            shadow-camera-bottom={-24}
             shadow-camera-near={1}
-            shadow-camera-far={50}
+            shadow-camera-far={55}
           />
           <Island />
-          <Landmarks />
+          <Suspense fallback={null}>
+            <Landmarks />
+          </Suspense>
           <IsleCamera
             follow={entered}
             target={playerPose}

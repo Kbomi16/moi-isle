@@ -38,12 +38,12 @@ export const DUMMY_REPLY = '안녕'
 export const DUMMY_NAME = '방문객'
 
 export const COLORS = {
-  sky: '#8ec4e0',
-  water: '#4e96b8',
-  sand: '#e6d0a0',
-  grass: '#6fa86c',
+  sky: '#9fd6ea',
+  water: '#4e9bb3',
+  sand: '#e8cc8a',
+  grass: '#7db85c',
   foliage: '#3f7a48',
-  trunk: '#7a5a3a',
+  trunk: '#8a5a3a',
   dock: '#c4a574',
   bench: '#cbb07a',
   player: '#e4b56a',
