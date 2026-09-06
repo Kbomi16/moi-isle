@@ -16,6 +16,19 @@ export const normalizeChat = (raw: string): string | null => {
   return text.slice(0, MAX_CHAT)
 }
 
+export const isChatOpenKey = (event: {
+  key: string
+  metaKey: boolean
+  ctrlKey: boolean
+  altKey: boolean
+  repeat?: boolean
+}): boolean =>
+  event.key === '/' &&
+  !event.metaKey &&
+  !event.ctrlKey &&
+  !event.altKey &&
+  !event.repeat
+
 export const listenerIdsInRange = (
   speaker: Vec2,
   listeners: Listener[],

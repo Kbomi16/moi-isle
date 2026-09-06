@@ -9,7 +9,7 @@ import {
   DUMMY_REPLY,
   DUMMY_REPLY_MS,
 } from './world/constants.ts'
-import { listenerIdsInRange, normalizeChat } from './world/chat.ts'
+import { isChatOpenKey, listenerIdsInRange, normalizeChat } from './world/chat.ts'
 import { isWithinRange } from './world/proximity.ts'
 import { initialDummyPose, initialPlayerPose } from './world/spawn.ts'
 import type { ProximityState } from './scene/ProximitySensor.tsx'
@@ -23,8 +23,8 @@ export default function App() {
   const [nickname, setNickname] = useState<string | null>(null)
   const [proximity, setProximity] = useState<ProximityState>({
     name: false,
-    chat: false,
   })
+  const [chatOpen, setChatOpen] = useState(false)
   const [playerBubble, setPlayerBubble] = useState<Bubble | null>(null)
   const [dummyBubble, setDummyBubble] = useState<Bubble | null>(null)
 
@@ -47,6 +47,30 @@ export default function App() {
     return () => window.clearInterval(timer)
   }, [])
 
+  useEffect(() => {
+    if (!nickname) {
+      return
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isChatOpenKey(event)) {
+        return
+      }
+      const target = event.target
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement
+      ) {
+        return
+      }
+      event.preventDefault()
+      setChatOpen(true)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [nickname])
+
   const handleEnter = (name: string) => {
     playerPose.current = initialPlayerPose()
     setNickname(name)
@@ -54,6 +78,11 @@ export default function App() {
 
   const handleFocusChange = useCallback((focused: boolean) => {
     chatFocused.current = focused
+  }, [])
+
+  const handleCloseChat = useCallback(() => {
+    setChatOpen(false)
+    chatFocused.current = false
   }, [])
 
   const handleSend = (raw: string) => {
@@ -98,8 +127,12 @@ export default function App() {
       {nickname ? (
         <>
           <Hud name={nickname} />
-          {proximity.chat ? (
-            <ChatBar onFocusChange={handleFocusChange} onSend={handleSend} />
+          {chatOpen ? (
+            <ChatBar
+              onClose={handleCloseChat}
+              onFocusChange={handleFocusChange}
+              onSend={handleSend}
+            />
           ) : null}
         </>
       ) : (

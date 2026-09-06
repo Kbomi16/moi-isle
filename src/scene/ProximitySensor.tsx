@@ -1,13 +1,12 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { RefObject } from 'react'
-import { CHAT_RANGE, NAME_RANGE } from '../world/constants.ts'
+import { NAME_RANGE } from '../world/constants.ts'
 import { isWithinRange } from '../world/proximity.ts'
 import type { Pose } from '../world/constants.ts'
 
 export type ProximityState = {
   name: boolean
-  chat: boolean
 }
 
 type ProximitySensorProps = {
@@ -23,20 +22,21 @@ export function ProximitySensor({
   dummy,
   onProximity,
 }: ProximitySensorProps) {
-  const last = useRef<ProximityState>({ name: false, chat: false })
+  const last = useRef<ProximityState>({ name: false })
 
   useFrame(() => {
     const playerPose = player.current
     const dummyPose = dummy.current
-    const next: ProximityState =
-      enabled && playerPose && dummyPose
-        ? {
-            name: isWithinRange(playerPose, dummyPose, NAME_RANGE),
-            chat: isWithinRange(playerPose, dummyPose, CHAT_RANGE),
-          }
-        : { name: false, chat: false }
+    const next: ProximityState = {
+      name: Boolean(
+        enabled &&
+          playerPose &&
+          dummyPose &&
+          isWithinRange(playerPose, dummyPose, NAME_RANGE),
+      ),
+    }
 
-    if (next.name === last.current.name && next.chat === last.current.chat) {
+    if (next.name === last.current.name) {
       return
     }
 

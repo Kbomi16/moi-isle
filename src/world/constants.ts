@@ -13,7 +13,7 @@ export const ISLAND_GRASS_RADIUS = 16
 export const ISLAND_WALK_RADIUS = 15.2
 export const ISLAND_SAND_RADIUS = 18.2
 
-export const WALK_SPEED = 1.65
+export const WALK_SPEED = 2.75
 export const DUMMY_SPEED = 0.9
 
 export const NAME_RANGE = 6
