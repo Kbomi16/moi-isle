@@ -1,14 +1,52 @@
 import { useMemo } from 'react'
 import { BufferAttribute, BufferGeometry, Color } from 'three'
-import { COLORS, SAND_OUTER } from '../world/constants.ts'
+import {
+  BEACH_WIDTH,
+  CLIFF_BOTTOM_Y,
+  COLORS,
+  SAND_OUTER,
+  WATER_Y,
+} from '../world/constants.ts'
 import {
   groundHeight,
   islandSignedDistance,
   terrainColor,
 } from '../world/island.ts'
 
-const GRID = 88
-const HALF = 30
+const GRID = 92
+const HALF = 22
+
+const isMeshed = (x: number, z: number): boolean =>
+  islandSignedDistance(x, z) <= SAND_OUTER + BEACH_WIDTH
+
+const pushVertex = (
+  positions: number[],
+  colors: number[],
+  color: Color,
+  x: number,
+  y: number,
+  z: number,
+  hex: string,
+) => {
+  positions.push(x, y, z)
+  color.set(hex)
+  colors.push(color.r, color.g, color.b)
+}
+
+const pushQuad = (
+  positions: number[],
+  colors: number[],
+  color: Color,
+  a: { x: number; y: number; z: number },
+  b: { x: number; y: number; z: number },
+  c: { x: number; y: number; z: number },
+  d: { x: number; y: number; z: number },
+  hex: string,
+) => {
+  for (const point of [a, b, c, a, c, d]) {
+    pushVertex(positions, colors, color, point.x, point.y, point.z, hex)
+  }
+}
 
 const createIslandGeometry = (): BufferGeometry => {
   const step = (HALF * 2) / GRID
@@ -28,29 +66,46 @@ const createIslandGeometry = (): BufferGeometry => {
         { x: x1, z: z1 },
         { x: x0, z: z1 },
       ]
-      if (
-        corners.some(
-          (corner) => islandSignedDistance(corner.x, corner.z) > SAND_OUTER,
-        )
-      ) {
+      if (!corners.some((corner) => isMeshed(corner.x, corner.z))) {
         continue
       }
 
-      const quad = [
-        corners[0],
-        corners[1],
-        corners[2],
-        corners[0],
-        corners[2],
-        corners[3],
+      const tops = corners.map((corner) => ({
+        x: corner.x,
+        y: groundHeight(corner.x, corner.z),
+        z: corner.z,
+      }))
+      const hex = terrainColor(x0 + step / 2, z0 + step / 2)
+      const first = tops[0]
+      const second = tops[1]
+      const third = tops[2]
+      const fourth = tops[3]
+      if (!first || !second || !third || !fourth) {
+        continue
+      }
+      pushQuad(positions, colors, color, first, second, third, fourth, hex)
+
+      const land = corners.map((corner) => isMeshed(corner.x, corner.z))
+      const edges = [
+        { a: first, b: second, outward: !land[1] },
+        { a: second, b: third, outward: !land[2] },
+        { a: third, b: fourth, outward: !land[3] },
+        { a: fourth, b: first, outward: !land[0] },
       ]
-      for (const corner of quad) {
-        if (!corner) {
+      for (const edge of edges) {
+        if (!edge.outward) {
           continue
         }
-        positions.push(corner.x, groundHeight(corner.x, corner.z), corner.z)
-        color.set(terrainColor(corner.x, corner.z))
-        colors.push(color.r, color.g, color.b)
+        pushQuad(
+          positions,
+          colors,
+          color,
+          edge.a,
+          { x: edge.a.x, y: CLIFF_BOTTOM_Y, z: edge.a.z },
+          { x: edge.b.x, y: CLIFF_BOTTOM_Y, z: edge.b.z },
+          edge.b,
+          COLORS.cliff,
+        )
       }
     }
   }
@@ -67,7 +122,11 @@ export function Island() {
 
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.7, 0]} receiveShadow>
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, WATER_Y, 0]}
+        receiveShadow
+      >
         <circleGeometry args={[80, 80]} />
         <meshStandardMaterial
           color={COLORS.water}

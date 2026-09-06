@@ -91,7 +91,7 @@ export function IsleCanvas({
           }}
         >
           <color attach="background" args={[COLORS.sky]} />
-          <fog attach="fog" args={[COLORS.sky, 38, 92]} />
+          <fog attach="fog" args={[COLORS.sky, 34, 78]} />
           <hemisphereLight args={['#ffe7c4', '#6b8f4a', 0.72]} />
           <ambientLight intensity={0.32} />
           <directionalLight

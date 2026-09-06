@@ -1,4 +1,6 @@
 import {
+  BEACH_WIDTH,
+  COLORS,
   GRASS_BASE_Y,
   ISLAND_BLOBS,
   ISLAND_HILLS,
@@ -7,13 +9,14 @@ import {
   PATH_HALF,
   SAND_INNER,
   SAND_OUTER,
+  SAND_SHELF_Y,
   VILLAGE_PLAZA,
   WALK_INSET,
-  COLORS,
+  WATER_Y,
 } from './constants.ts'
 import type { Ellipse, Vec2 } from './constants.ts'
 
-const INTERIOR = { x: 0, z: 1 }
+const INTERIOR = { x: 0, z: 0.4 }
 
 export const ellipseSignedDistance = (
   x: number,
@@ -102,14 +105,23 @@ export const hillHeight = (x: number, z: number): number => {
 
 export const groundHeight = (x: number, z: number): number => {
   const sdf = islandSignedDistance(x, z)
+  if (sdf > SAND_OUTER + BEACH_WIDTH) {
+    return WATER_Y
+  }
+
+  if (sdf > SAND_OUTER) {
+    const beachT = (sdf - SAND_OUTER) / BEACH_WIDTH
+    return SAND_SHELF_Y * (1 - beachT) + WATER_Y * beachT
+  }
+
   const sandSpan = SAND_OUTER - SAND_INNER
   const sandT = Math.min(1, Math.max(0, (sdf - SAND_INNER) / sandSpan))
-  const base = sdf > SAND_INNER ? GRASS_BASE_Y - sandT * 0.5 : GRASS_BASE_Y
-  let y = base + hillHeight(x, z)
+  const base = sdf > SAND_INNER ? GRASS_BASE_Y - sandT * (GRASS_BASE_Y - SAND_SHELF_Y) : GRASS_BASE_Y
+  let y = base + (sdf <= SAND_INNER ? hillHeight(x, z) : 0)
 
   const alongPath = pathDistance(x, z)
   const pathBlend = 1 - Math.min(1, alongPath / (PATH_HALF + 0.45))
-  if (pathBlend > 0) {
+  if (pathBlend > 0 && sdf <= SAND_INNER) {
     y = y * (1 - pathBlend * 0.88) + GRASS_BASE_Y * pathBlend * 0.88
   }
 

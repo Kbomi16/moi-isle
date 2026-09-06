@@ -1,6 +1,6 @@
 # 에셋 출처
 
-모이섬 1차는 직접 하이폴리 모델링을 하지 않고, CC0 로우폴리 GLB를 가져와 조립한다.
+모이섬은 직접 하이폴리 모델링을 하지 않고, CC0 로우폴리 GLB와 낮은 폴리 지오메트리로 조립한다.
 
 ## Kenney Pirate Kit
 
@@ -13,19 +13,17 @@
 
 | 파일 | 씬에서의 역할 |
 | --- | --- |
-| `palm-detailed-straight.glb` | 만남용 야자 (나무 랜드마크) |
+| `palm-detailed-straight.glb` | 언덕 야자 |
 | `palm-straight.glb` | 같은 자리의 작은 야자 |
-| `structure-platform-dock.glb` | 물가로 나가는 부두 (두 칸) |
-| `structure.glb` | 마을 집 몸체 |
-| `structure-roof.glb` | 마을 집 지붕 |
-| `structure-fence.glb` | 광장 울타리 |
-| `patch-sand.glb` | 물가 모래 |
+| `structure-platform-dock.glb` | 북쪽 물가로 나가는 부두 |
+| `patch-sand.glb` | 부두 앞 모래 |
 | `patch-grass.glb` | 야자 아래 풀 |
-| `rocks-sand-a.glb` | 물가 바위 두 개 |
+| `rocks-sand-a.glb` | 물가 바위 |
 | `grass-plant.glb` | 가장자리 풀 포기 |
 | `Textures/colormap.png` | 위 GLB가 참조하는 팔레트 텍스처 |
 
-## 지형
+## 지형과 집
 
-섬 윤곽·언덕·길은 지오메트리로 만든다.  
-집은 Pirate Kit의 구조물·지붕으로 조립하고, 주민은 캡슐 대신 둥근 씨 모양 몸으로 둔다.
+섬 윤곽·모래 턱·절벽·길은 지오메트리로 만든다.  
+마을 집 세 채는 Pirate Kit 플랫폼 대신, 낮은 폴리 오두막(벽·지붕·굴뚝·문·창)으로 내륙 광장 주위에 앉힌다.  
+주민은 둥근 씨 모양 몸이다.
