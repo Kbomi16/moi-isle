@@ -16,6 +16,9 @@
 | `palm-detailed-straight.glb` | 만남용 야자 (나무 랜드마크) |
 | `palm-straight.glb` | 같은 자리의 작은 야자 |
 | `structure-platform-dock.glb` | 물가로 나가는 부두 (두 칸) |
+| `structure.glb` | 마을 집 몸체 |
+| `structure-roof.glb` | 마을 집 지붕 |
+| `structure-fence.glb` | 광장 울타리 |
 | `patch-sand.glb` | 물가 모래 |
 | `patch-grass.glb` | 야자 아래 풀 |
 | `rocks-sand-a.glb` | 물가 바위 두 개 |
@@ -24,5 +27,5 @@
 
 ## 지형
 
-풀밭 원판, 모래 턱, 바닷물은 읽히는 섬 윤곽을 위해 지오메트리로 둔다.  
-색만 Pirate Kit 낮 팔레트에 맞춰 바꿨다. 새로 조각하지 않았다.
+섬 윤곽·언덕·길은 지오메트리로 만든다.  
+집은 Pirate Kit의 구조물·지붕으로 조립하고, 주민은 캡슐 대신 둥근 씨 모양 몸으로 둔다.

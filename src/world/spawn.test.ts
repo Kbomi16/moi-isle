@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { DUMMY_WAYPOINTS, PLAYER_SPAWN } from './constants.ts'
-import { initialDummyPose, initialPlayerPose } from './spawn.ts'
+import { PLAYER_SPAWN, VILLAGERS } from './constants.ts'
+import { initialNpcPoses, initialPlayerPose } from './spawn.ts'
 
 describe('spawn', () => {
   test('플레이어는 스폰 좌표에서 시작한다', () => {
@@ -11,11 +11,17 @@ describe('spawn', () => {
     })
   })
 
-  test('더미는 첫 웨이포인트에서 시작한다', () => {
-    expect(initialDummyPose()).toEqual({
-      x: DUMMY_WAYPOINTS[0]?.x,
-      z: DUMMY_WAYPOINTS[0]?.z,
+  test('주민은 첫 웨이포인트에서 시작한다', () => {
+    const poses = initialNpcPoses()
+    const first = VILLAGERS[0]
+    if (!first) {
+      throw new Error('주민이 없다')
+    }
+    expect(poses[first.id]).toEqual({
+      x: first.waypoints[0]?.x,
+      z: first.waypoints[0]?.z,
       yaw: 0,
     })
+    expect(Object.keys(poses)).toHaveLength(VILLAGERS.length)
   })
 })

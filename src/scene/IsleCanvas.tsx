@@ -5,13 +5,13 @@ import type { PointerEvent, RefObject } from 'react'
 import { PCFSoftShadowMap } from 'three'
 import { COLORS } from '../world/constants.ts'
 import type { Pose } from '../world/constants.ts'
-import { DummyVisitor } from './DummyVisitor.tsx'
 import { Island } from './Island.tsx'
 import { IsleCamera } from './IsleCamera.tsx'
 import { Landmarks } from './Landmarks.tsx'
 import { Player } from './Player.tsx'
 import { ProximitySensor } from './ProximitySensor.tsx'
 import type { ProximityState } from './ProximitySensor.tsx'
+import { Villagers } from './Villagers.tsx'
 
 const keyMap = [
   { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
@@ -23,24 +23,24 @@ const keyMap = [
 type IsleCanvasProps = {
   playerName: string | null
   playerPose: RefObject<Pose>
-  dummyPose: RefObject<Pose>
+  npcPoses: RefObject<Record<string, Pose>>
   cameraYaw: RefObject<number>
   chatFocused: RefObject<boolean>
-  showDummyName: boolean
+  namedIds: string[]
   playerBubble: string | null
-  dummyBubble: string | null
+  npcBubbles: Record<string, string | null>
   onProximity: (state: ProximityState) => void
 }
 
 export function IsleCanvas({
   playerName,
   playerPose,
-  dummyPose,
+  npcPoses,
   cameraYaw,
   chatFocused,
-  showDummyName,
+  namedIds,
   playerBubble,
-  dummyBubble,
+  npcBubbles,
   onProximity,
 }: IsleCanvasProps) {
   const dragging = useRef<number | null>(null)
@@ -84,29 +84,29 @@ export function IsleCanvas({
       <KeyboardControls map={keyMap}>
         <Canvas
           shadows
-          camera={{ fov: 42, position: [18, 12, 18], near: 0.1, far: 140 }}
+          camera={{ fov: 42, position: [20, 14, 20], near: 0.1, far: 160 }}
           gl={{ antialias: true, toneMappingExposure: 1.08 }}
           onCreated={({ gl }) => {
             gl.shadowMap.type = PCFSoftShadowMap
           }}
         >
           <color attach="background" args={[COLORS.sky]} />
-          <fog attach="fog" args={[COLORS.sky, 34, 78]} />
+          <fog attach="fog" args={[COLORS.sky, 38, 92]} />
           <hemisphereLight args={['#ffe7c4', '#6b8f4a', 0.72]} />
           <ambientLight intensity={0.32} />
           <directionalLight
             castShadow
             color="#fff4dc"
-            position={[12, 16, 7]}
+            position={[14, 18, 8]}
             intensity={1.55}
             shadow-bias={-0.0004}
             shadow-mapSize={[2048, 2048]}
-            shadow-camera-left={-24}
-            shadow-camera-right={24}
-            shadow-camera-top={24}
-            shadow-camera-bottom={-24}
+            shadow-camera-left={-32}
+            shadow-camera-right={32}
+            shadow-camera-top={32}
+            shadow-camera-bottom={-32}
             shadow-camera-near={1}
-            shadow-camera-far={55}
+            shadow-camera-far={70}
           />
           <Island />
           <Suspense fallback={null}>
@@ -126,15 +126,15 @@ export function IsleCanvas({
               bubble={playerBubble}
             />
           ) : null}
-          <DummyVisitor
-            pose={dummyPose}
-            showName={showDummyName}
-            bubble={dummyBubble}
+          <Villagers
+            poses={npcPoses}
+            namedIds={namedIds}
+            bubbles={npcBubbles}
           />
           <ProximitySensor
             enabled={entered}
             player={playerPose}
-            dummy={dummyPose}
+            npcs={npcPoses}
             onProximity={onProximity}
           />
         </Canvas>
