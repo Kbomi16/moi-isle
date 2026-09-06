@@ -5,6 +5,9 @@
   --paper-edge: #d7c7a8;
   --ink: #3d4a3c;
   --ink-soft: #5c6b58;
+  --puff: #fff7ea;
+  --stitch: #d97858;
+  --chat: 'Cute Font', 'Gowun Dodum', sans-serif;
 }
 
 html,
@@ -67,8 +70,7 @@ input {
   box-shadow: 0 10px 30px rgb(61 74 60 / 12%);
 }
 
-.gate input,
-.chat input {
+.gate input {
   width: 10.5rem;
   padding: 0.35rem 0.15rem;
   border: 0;
@@ -76,8 +78,7 @@ input {
   outline: none;
 }
 
-.gate input::placeholder,
-.chat input::placeholder {
+.gate input::placeholder {
   color: var(--ink-soft);
 }
 
@@ -91,10 +92,14 @@ input {
 }
 
 .gate button:focus-visible,
-.gate input:focus-visible,
-.chat input:focus-visible {
+.gate input:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+}
+
+.chat input:focus-visible {
+  outline: 2px solid var(--stitch);
+  outline-offset: 3px;
 }
 
 .hud {
@@ -122,36 +127,83 @@ input {
 
 .chat {
   left: 50%;
-  bottom: 1.4rem;
+  bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 18rem;
   transform: translateX(-50%);
-  padding: 0.4rem 1rem;
-  border: 1px solid var(--paper-edge);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--paper) 94%, white);
+  padding: 0.55rem 1.15rem 0.7rem;
+  border: 3px solid var(--stitch);
+  border-radius: 1.4rem 1.4rem 1.4rem 0.55rem;
+  background: var(--puff);
+  box-shadow:
+    0 8px 0 rgb(217 120 88 / 18%),
+    0 14px 28px rgb(61 74 60 / 14%);
+  font-family: var(--chat);
+}
+
+.chat-label {
+  margin: 0 0 0.1rem;
+  color: var(--stitch);
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+}
+
+.chat-field {
+  display: block;
 }
 
 .chat input {
-  width: 16rem;
-  text-align: center;
+  width: 100%;
+  min-width: 16rem;
+  padding: 0.15rem 0.1rem 0.05rem;
+  border: 0;
+  border-bottom: 2px dashed color-mix(in srgb, var(--stitch) 55%, white);
+  background: transparent;
+  outline: none;
+  font-family: var(--chat);
+  font-size: 1.85rem;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.chat input::placeholder {
+  color: color-mix(in srgb, var(--stitch) 62%, var(--paper));
+}
+
+.actor-html {
+  width: max-content !important;
 }
 
 .actor-markup {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
+  width: max-content;
+  min-width: 9.5rem;
 }
 
 .bubble {
-  max-width: 12rem;
-  padding: 0.28rem 0.55rem;
-  border: 1px solid var(--paper-edge);
-  border-radius: 10px 10px 10px 3px;
-  background: var(--paper);
+  box-sizing: border-box;
+  min-width: 8.5rem;
+  width: max-content;
+  max-width: 16rem;
+  padding: 0.5rem 0.9rem 0.55rem;
+  border: 3px solid var(--stitch);
+  border-radius: 1.15rem 1.15rem 1.15rem 0.4rem;
+  background: var(--puff);
   color: var(--ink);
-  font-size: 0.82rem;
-  line-height: 1.35;
+  font-family: var(--chat);
+  font-size: 1.55rem;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
   text-align: center;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .nametag {

@@ -41,6 +41,9 @@ export function ChatBar({ onFocusChange, onSend, onClose }: ChatBarProps) {
 
   return (
     <form className="chat" onSubmit={handleSubmit}>
+      <p className="chat-label" aria-hidden>
+        한 마디
+      </p>
       <label className="chat-field">
         <span className="sr-only">말하기</span>
         <input
@@ -50,7 +53,7 @@ export function ChatBar({ onFocusChange, onSend, onClose }: ChatBarProps) {
           onBlur={() => onFocusChange(false)}
           onChange={(event) => setValue(event.currentTarget.value)}
           onFocus={() => onFocusChange(true)}
-          placeholder="말하기"
+          placeholder="안녕?"
           value={value}
         />
       </label>

@@ -14,9 +14,10 @@ export function ActorMarkup({ name, showName, bubble }: ActorMarkupProps) {
   return (
     <Html
       center
+      wrapperClass="actor-html"
       position={[0, 1.85, 0]}
       distanceFactor={10}
-      style={{ pointerEvents: 'none' }}
+      style={{ pointerEvents: 'none', width: 'max-content' }}
     >
       <div className="actor-markup">
         {bubble ? <p className="bubble">{bubble}</p> : null}
