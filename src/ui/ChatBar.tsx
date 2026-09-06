@@ -5,22 +5,24 @@ import { MAX_CHAT } from '../world/constants.ts'
 type ChatBarProps = {
   onFocusChange: (focused: boolean) => void
   onSend: (text: string) => void
+  onClose: () => void
 }
 
-export function ChatBar({ onFocusChange, onSend }: ChatBarProps) {
+export function ChatBar({ onFocusChange, onSend, onClose }: ChatBarProps) {
   const [value, setValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Enter') {
-        return
-      }
-      if (document.activeElement === inputRef.current) {
+      if (event.key !== 'Escape') {
         return
       }
       event.preventDefault()
-      inputRef.current?.focus()
+      onClose()
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -28,16 +30,20 @@ export function ChatBar({ onFocusChange, onSend }: ChatBarProps) {
       window.removeEventListener('keydown', handleKeyDown)
       onFocusChange(false)
     }
-  }, [onFocusChange])
+  }, [onClose, onFocusChange])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     onSend(value)
     setValue('')
+    onClose()
   }
 
   return (
     <form className="chat" onSubmit={handleSubmit}>
+      <p className="chat-label" aria-hidden>
+        한 마디
+      </p>
       <label className="chat-field">
         <span className="sr-only">말하기</span>
         <input
@@ -47,7 +53,7 @@ export function ChatBar({ onFocusChange, onSend }: ChatBarProps) {
           onBlur={() => onFocusChange(false)}
           onChange={(event) => setValue(event.currentTarget.value)}
           onFocus={() => onFocusChange(true)}
-          placeholder="말하기"
+          placeholder="안녕?"
           value={value}
         />
       </label>
