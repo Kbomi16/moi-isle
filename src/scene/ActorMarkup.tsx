@@ -14,7 +14,7 @@ export function ActorMarkup({ name, showName, bubble }: ActorMarkupProps) {
   return (
     <Html
       center
-      position={[0, 1.85, 0]}
+      position={[0, 1.72, 0]}
       distanceFactor={10}
       style={{ pointerEvents: 'none' }}
     >

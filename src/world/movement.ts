@@ -47,7 +47,6 @@ export const stepWalk = (
   cameraYaw: number,
   dt: number,
   speed: number,
-  radius: number,
   yaw: number,
 ): { position: Vec2; yaw: number; moving: boolean } => {
   const direction = walkVector(input, cameraYaw)
@@ -57,13 +56,10 @@ export const stepWalk = (
   }
 
   return {
-    position: clampToIsland(
-      {
-        x: position.x + direction.x * speed * dt,
-        z: position.z + direction.z * speed * dt,
-      },
-      radius,
-    ),
+    position: clampToIsland({
+      x: position.x + direction.x * speed * dt,
+      z: position.z + direction.z * speed * dt,
+    }),
     yaw: Math.atan2(direction.x, direction.z),
     moving: true,
   }
