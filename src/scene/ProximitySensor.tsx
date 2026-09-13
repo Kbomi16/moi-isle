@@ -1,42 +1,58 @@
 import { useFrame } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { RefObject } from 'react'
-import { CHAT_RANGE, NAME_RANGE } from '../world/constants.ts'
+import { CHAT_RANGE, NAME_RANGE, VILLAGERS } from '../world/constants.ts'
 import { isWithinRange } from '../world/proximity.ts'
+import { nearestListenerId } from '../world/chat.ts'
 import type { Pose } from '../world/constants.ts'
 
 export type ProximityState = {
-  name: boolean
-  chat: boolean
+  namedIds: string[]
+  chatId: string | null
 }
 
 type ProximitySensorProps = {
   enabled: boolean
   player: RefObject<Pose>
-  dummy: RefObject<Pose>
+  npcs: RefObject<Record<string, Pose>>
   onProximity: (state: ProximityState) => void
 }
+
+const sameState = (left: ProximityState, right: ProximityState): boolean =>
+  left.chatId === right.chatId &&
+  left.namedIds.length === right.namedIds.length &&
+  left.namedIds.every((id, index) => id === right.namedIds[index])
 
 export function ProximitySensor({
   enabled,
   player,
-  dummy,
+  npcs,
   onProximity,
 }: ProximitySensorProps) {
-  const last = useRef<ProximityState>({ name: false, chat: false })
+  const last = useRef<ProximityState>({ namedIds: [], chatId: null })
 
   useFrame(() => {
     const playerPose = player.current
-    const dummyPose = dummy.current
+    const npcPoses = npcs.current
     const next: ProximityState =
-      enabled && playerPose && dummyPose
+      enabled && playerPose
         ? {
-            name: isWithinRange(playerPose, dummyPose, NAME_RANGE),
-            chat: isWithinRange(playerPose, dummyPose, CHAT_RANGE),
+            namedIds: VILLAGERS.filter((villager) => {
+              const pose = npcPoses[villager.id]
+              return pose ? isWithinRange(playerPose, pose, NAME_RANGE) : false
+            }).map((villager) => villager.id),
+            chatId: nearestListenerId(
+              playerPose,
+              VILLAGERS.flatMap((villager) => {
+                const pose = npcPoses[villager.id]
+                return pose ? [{ id: villager.id, position: pose }] : []
+              }),
+              CHAT_RANGE,
+            ),
           }
-        : { name: false, chat: false }
+        : { namedIds: [], chatId: null }
 
-    if (next.name === last.current.name && next.chat === last.current.chat) {
+    if (sameState(next, last.current)) {
       return
     }
 

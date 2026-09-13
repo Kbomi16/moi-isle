@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { ISLAND_WALK_RADIUS } from './constants.ts'
+import { isWalkable } from './island.ts'
 import { stepWalk, walkVector } from './movement.ts'
 
 describe('walkVector', () => {
@@ -44,7 +44,6 @@ describe('stepWalk', () => {
       0,
       1,
       2,
-      ISLAND_WALK_RADIUS,
       0.4,
     )
     expect(result.position).toEqual({ x: 1, z: 2 })
@@ -59,7 +58,6 @@ describe('stepWalk', () => {
       0,
       1,
       2,
-      ISLAND_WALK_RADIUS,
       0,
     )
     expect(result.position.x).toBeCloseTo(0)
@@ -69,16 +67,13 @@ describe('stepWalk', () => {
 
   test('섬 밖으로 나가지 않는다', () => {
     const result = stepWalk(
-      { x: ISLAND_WALK_RADIUS - 0.1, z: 0 },
+      { x: 80, z: 0 },
       { forward: false, back: false, left: false, right: true },
       0,
       1,
       4,
-      ISLAND_WALK_RADIUS,
       0,
     )
-    expect(Math.hypot(result.position.x, result.position.z)).toBeCloseTo(
-      ISLAND_WALK_RADIUS,
-    )
+    expect(isWalkable(result.position)).toBe(true)
   })
 })

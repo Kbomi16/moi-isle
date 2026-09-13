@@ -1,4 +1,4 @@
-import { DUMMY_WAYPOINTS, PLAYER_SPAWN } from './constants.ts'
+import { PLAYER_SPAWN, VILLAGERS } from './constants.ts'
 import type { Pose } from './constants.ts'
 
 export const initialPlayerPose = (): Pose => ({
@@ -7,8 +7,14 @@ export const initialPlayerPose = (): Pose => ({
   yaw: 0,
 })
 
-export const initialDummyPose = (): Pose => ({
-  x: DUMMY_WAYPOINTS[0]?.x ?? 0,
-  z: DUMMY_WAYPOINTS[0]?.z ?? 0,
-  yaw: 0,
-})
+export const initialNpcPoses = (): Record<string, Pose> =>
+  Object.fromEntries(
+    VILLAGERS.map((villager) => [
+      villager.id,
+      {
+        x: villager.waypoints[0]?.x ?? 0,
+        z: villager.waypoints[0]?.z ?? 0,
+        yaw: 0,
+      },
+    ]),
+  )

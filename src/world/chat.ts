@@ -24,3 +24,24 @@ export const listenerIdsInRange = (
   listeners
     .filter((listener) => isWithinRange(speaker, listener.position, range))
     .map((listener) => listener.id)
+
+export const nearestListenerId = (
+  speaker: Vec2,
+  listeners: Listener[],
+  range: number,
+): string | null => {
+  let nearest: { id: string; distance: number } | null = null
+  for (const listener of listeners) {
+    const dx = listener.position.x - speaker.x
+    const dz = listener.position.z - speaker.z
+    const distance = Math.hypot(dx, dz)
+    if (distance > range) {
+      continue
+    }
+    if (!nearest || distance < nearest.distance) {
+      nearest = { id: listener.id, distance }
+    }
+  }
+
+  return nearest?.id ?? null
+}

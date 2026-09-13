@@ -3,13 +3,9 @@ import { useKeyboardControls } from '@react-three/drei'
 import { useRef } from 'react'
 import type { RefObject } from 'react'
 import type { Group } from 'three'
-import {
-  COLORS,
-  GROUND_Y,
-  ISLAND_WALK_RADIUS,
-  WALK_SPEED,
-} from '../world/constants.ts'
+import { PLAYER_LOOK, WALK_SPEED } from '../world/constants.ts'
 import { stepWalk } from '../world/movement.ts'
+import { groundHeight } from '../world/island.ts'
 import type { Pose } from '../world/constants.ts'
 import { CharacterBody } from './CharacterBody.tsx'
 import { ActorMarkup } from './ActorMarkup.tsx'
@@ -52,7 +48,6 @@ export function Player({
         cameraYaw.current ?? 0,
         Math.min(delta, 0.05),
         WALK_SPEED,
-        ISLAND_WALK_RADIUS,
         current.yaw,
       )
       current.x = next.position.x
@@ -63,7 +58,7 @@ export function Player({
     if (!node) {
       return
     }
-    node.position.set(current.x, GROUND_Y, current.z)
+    node.position.set(current.x, groundHeight(current.x, current.z), current.z)
     node.rotation.y = current.yaw
   })
 
@@ -72,10 +67,14 @@ export function Player({
   return (
     <group
       ref={group}
-      position={[start?.x ?? 0, GROUND_Y, start?.z ?? 0]}
+      position={[
+        start?.x ?? 0,
+        groundHeight(start?.x ?? 0, start?.z ?? 0),
+        start?.z ?? 0,
+      ]}
       rotation={[0, start?.yaw ?? 0, 0]}
     >
-      <CharacterBody color={COLORS.player} />
+      <CharacterBody look={PLAYER_LOOK} />
       <ActorMarkup name={name} showName={false} bubble={bubble} />
     </group>
   )

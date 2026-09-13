@@ -1,20 +1,26 @@
 import { useGLTF } from '@react-three/drei'
-import { GROUND_Y } from '../world/constants.ts'
+import { HOUSES } from '../world/constants.ts'
+import { groundHeight } from '../world/island.ts'
+import { Cottage } from './Cottage.tsx'
 import { IsleModel } from './IsleModel.tsx'
 import { MODELS } from './models.ts'
 
 function Palms() {
   return (
     <group>
-      <IsleModel position={[-6.2, GROUND_Y, 3.9]} scale={1.05} url={MODELS.palm} />
       <IsleModel
-        position={[-8.5, GROUND_Y, 5.4]}
+        position={[-7.2, groundHeight(-7.2, 2.2), 2.2]}
+        scale={1.05}
+        url={MODELS.palm}
+      />
+      <IsleModel
+        position={[-8.8, groundHeight(-8.8, 3.6), 3.6]}
         rotation={[0, 0.7, 0]}
         scale={0.82}
         url={MODELS.palmSmall}
       />
       <IsleModel
-        position={[-6.4, GROUND_Y, 4.6]}
+        position={[-7.4, groundHeight(-7.4, 2.8), 2.8]}
         rotation={[0, 0.4, 0]}
         scale={0.9}
         url={MODELS.patchGrass}
@@ -27,17 +33,39 @@ function Dock() {
   return (
     <group>
       <IsleModel
-        position={[0, -0.28, 15.4]}
+        position={[0, groundHeight(0, 13.4) - 0.12, 13.4]}
         rotation={[0, Math.PI / 2, 0]}
-        scale={1.15}
+        scale={1.05}
         url={MODELS.dock}
       />
       <IsleModel
-        position={[0, -0.28, 18.1]}
+        position={[0, groundHeight(0, 15.8) - 0.06, 15.8]}
         rotation={[0, Math.PI / 2, 0]}
-        scale={1.15}
+        scale={1.05}
         url={MODELS.dock}
       />
+    </group>
+  )
+}
+
+function Village() {
+  return (
+    <group>
+      {HOUSES.map((house) => (
+        <group
+          key={`${house.x}-${house.z}`}
+          position={[house.x, groundHeight(house.x, house.z), house.z]}
+          rotation={[0, house.yaw, 0]}
+          scale={house.scale}
+        >
+          <Cottage
+            door={house.door}
+            flower={house.flower}
+            roof={house.roof}
+            wall={house.wall}
+          />
+        </group>
+      ))}
     </group>
   )
 }
@@ -45,29 +73,38 @@ function Dock() {
 function Shore() {
   return (
     <group>
-      <IsleModel position={[0.4, 0.16, 14.2]} rotation={[0, 0.2, 0]} url={MODELS.patchSand} />
       <IsleModel
-        position={[11.5, 0.14, 9.4]}
-        rotation={[0, 1.1, 0]}
+        position={[0.3, groundHeight(0.3, 11.2) - 0.04, 11.2]}
+        rotation={[0, 0.2, 0]}
         scale={0.72}
         url={MODELS.patchSand}
       />
       <IsleModel
-        position={[-10.8, 0.14, 11.2]}
-        rotation={[0, -0.6, 0]}
-        scale={0.68}
-        url={MODELS.patchSand}
-      />
-      <IsleModel position={[12.2, -0.02, 8.6]} rotation={[0, 0.4, 0]} scale={0.36} url={MODELS.rock} />
-      <IsleModel
-        position={[-13.4, -0.04, 6.2]}
-        rotation={[0, 2.1, 0]}
+        position={[10.2, groundHeight(10.2, 1.2) - 0.06, 1.2]}
+        rotation={[0, 1.1, 0]}
         scale={0.28}
         url={MODELS.rock}
       />
-      <IsleModel position={[5.8, GROUND_Y, -11.6]} url={MODELS.grassPlant} />
-      <IsleModel position={[-11.2, GROUND_Y, -4.4]} rotation={[0, 1.2, 0]} url={MODELS.grassPlant} />
-      <IsleModel position={[9.6, GROUND_Y, 10.4]} rotation={[0, -0.5, 0]} url={MODELS.grassPlant} />
+      <IsleModel
+        position={[-10.4, groundHeight(-10.4, 0.6) - 0.06, 0.6]}
+        rotation={[0, 2.1, 0]}
+        scale={0.24}
+        url={MODELS.rock}
+      />
+      <IsleModel
+        position={[7.4, groundHeight(7.4, 4.2), 4.2]}
+        rotation={[0, -0.5, 0]}
+        url={MODELS.grassPlant}
+      />
+      <IsleModel
+        position={[-3.2, groundHeight(-3.2, -7.2), -7.2]}
+        rotation={[0, 1.2, 0]}
+        url={MODELS.grassPlant}
+      />
+      <IsleModel
+        position={[5.8, groundHeight(5.8, -6.4), -6.4]}
+        url={MODELS.grassPlant}
+      />
     </group>
   )
 }
@@ -77,6 +114,7 @@ export function Landmarks() {
     <group>
       <Palms />
       <Dock />
+      <Village />
       <Shore />
     </group>
   )

@@ -9,9 +9,63 @@ export type Pose = {
   yaw: number
 }
 
-export const ISLAND_GRASS_RADIUS = 16
-export const ISLAND_WALK_RADIUS = 15.2
-export const ISLAND_SAND_RADIUS = 18.2
+export type Ellipse = {
+  cx: number
+  cz: number
+  rx: number
+  rz: number
+}
+
+export type CharacterLook = {
+  skin: string
+  shirt: string
+  hair: string
+}
+
+export type Villager = {
+  id: string
+  name: string
+  reply: string
+  look: CharacterLook
+  waypoints: Vec2[]
+}
+
+export const ISLAND_BLOBS: Ellipse[] = [
+  { cx: 0, cz: 0.2, rx: 11.6, rz: 10.4 },
+  { cx: -6.8, cz: 1.8, rx: 5.8, rz: 5.2 },
+  { cx: 5.8, cz: -2.2, rx: 5.4, rz: 5 },
+  { cx: 0, cz: 11.8, rx: 2.85, rz: 4.3 },
+]
+
+export const ISLAND_HILLS = [
+  { cx: -7.4, cz: 1.6, radius: 5.2, peak: 1.15 },
+  { cx: 5.2, cz: -3.8, radius: 3.4, peak: 0.28 },
+] as const
+
+export const ISLAND_PATH: Vec2[] = [
+  { x: 0, z: 12.4 },
+  { x: 0.2, z: 7.2 },
+  { x: 0.4, z: 2.4 },
+  { x: 0.4, z: -1.2 },
+]
+
+export const ISLAND_PATH_BRANCH: Vec2[] = [
+  { x: 0.4, z: -1.2 },
+  { x: 3.4, z: -2.2 },
+]
+
+export const VILLAGE_PLAZA = { x: 0.4, z: -1.2, radius: 2.55 } as const
+
+export const WALK_INSET = -1.05
+export const SAND_INNER = -1.85
+export const SAND_OUTER = 0.35
+export const BEACH_WIDTH = 2.35
+export const PATH_HALF = 1.05
+export const WATER_Y = -1.85
+export const CLIFF_BOTTOM_Y = -2.9
+export const SAND_SHELF_Y = 0.92
+export const BEACH_LIP_Y = 0.22
+export const GRASS_BASE_Y = 1.58
 
 export const WALK_SPEED = 1.65
 export const DUMMY_SPEED = 0.9
@@ -22,26 +76,95 @@ export const CHAT_RANGE = 3.2
 export const MAX_NICKNAME = 10
 export const MAX_CHAT = 40
 
-export const GROUND_Y = 0.38
 export const CAMERA_DISTANCE = 8.5
-export const CAMERA_HEIGHT = 5.2
+export const CAMERA_HEIGHT = 4.8
 export const BUBBLE_MS = 4000
 export const DUMMY_REPLY_MS = 800
 
-export const PLAYER_SPAWN = { x: 2, z: 6 } as const
-export const DUMMY_WAYPOINTS: Vec2[] = [
-  { x: 0, z: 13.5 },
-  { x: -6, z: 4 },
+export const PLAYER_SPAWN = { x: 0.4, z: 5.2 } as const
+
+export const PLAYER_LOOK: CharacterLook = {
+  skin: '#f0c48a',
+  shirt: '#e4b56a',
+  hair: '#6b4530',
+}
+
+export const VILLAGERS: Villager[] = [
+  {
+    id: 'molae',
+    name: '모래',
+    reply: '부두에서 왔어',
+    look: { skin: '#f3d2a0', shirt: '#e8b25a', hair: '#8a5a32' },
+    waypoints: [
+      { x: 0.2, z: 11.4 },
+      { x: 0.4, z: 4.4 },
+      { x: 0.4, z: -1.1 },
+    ],
+  },
+  {
+    id: 'pulip',
+    name: '풀잎',
+    reply: '안녕',
+    look: { skin: '#efd4a8', shirt: '#6fa86c', hair: '#3f7a48' },
+    waypoints: [
+      { x: 3.2, z: -2.4 },
+      { x: 1.2, z: -4.2 },
+      { x: -1.4, z: -2.6 },
+    ],
+  },
+  {
+    id: 'joyak',
+    name: '조약',
+    reply: '언덕이 좋아',
+    look: { skin: '#e8c8b0', shirt: '#7aa0c4', hair: '#4d5e72' },
+    waypoints: [
+      { x: -6.6, z: 2.2 },
+      { x: -3.2, z: 0.4 },
+      { x: 0.2, z: -0.8 },
+    ],
+  },
 ]
 
-export const DUMMY_REPLY = '안녕'
-export const DUMMY_NAME = '방문객'
+export const HOUSES = [
+  {
+    x: 4.6,
+    z: -2.4,
+    yaw: -0.85,
+    scale: 1,
+    wall: '#f7d3b4',
+    roof: '#ef7d62',
+    door: '#8b5340',
+    flower: '#f4a4c4',
+  },
+  {
+    x: -4.3,
+    z: -1.8,
+    yaw: 0.95,
+    scale: 0.94,
+    wall: '#dcecc8',
+    roof: '#5c8f72',
+    door: '#4a6b4a',
+    flower: '#f6d56a',
+  },
+  {
+    x: 0.8,
+    z: -5.2,
+    yaw: 0.08,
+    scale: 0.88,
+    wall: '#fff1d6',
+    roof: '#d9a05c',
+    door: '#7a4e32',
+    flower: '#8fd0a0',
+  },
+] as const
 
 export const COLORS = {
   sky: '#9fd6ea',
   water: '#4e9bb3',
   sand: '#e8cc8a',
+  cliff: '#9a7040',
   grass: '#7db85c',
+  path: '#c9a36a',
   foliage: '#3f7a48',
   trunk: '#8a5a3a',
   dock: '#c4a574',

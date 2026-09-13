@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { listenerIdsInRange, normalizeChat } from './chat.ts'
+import { listenerIdsInRange, nearestListenerId, normalizeChat } from './chat.ts'
 
 describe('normalizeChat', () => {
   test('빈 말은 거절한다', () => {
@@ -17,6 +17,20 @@ describe('normalizeChat', () => {
 })
 
 describe('listenerIdsInRange', () => {
+  test('가장 가까운 청취자만 고른다', () => {
+    expect(
+      nearestListenerId(
+        { x: 0, z: 0 },
+        [
+          { id: 'near', position: { x: 2, z: 0 } },
+          { id: 'closer', position: { x: 1, z: 0 } },
+          { id: 'far', position: { x: 10, z: 0 } },
+        ],
+        3.2,
+      ),
+    ).toBe('closer')
+  })
+
   test('가까운 청취자만 남긴다', () => {
     const heard = listenerIdsInRange(
       { x: 0, z: 0 },
