@@ -31,9 +31,10 @@ export type Villager = {
 }
 
 export const ISLAND_BLOBS: Ellipse[] = [
-  { cx: 0, cz: 0.4, rx: 12.2, rz: 10.8 },
-  { cx: -7.2, cz: 1.4, rx: 6.1, rz: 5.4 },
-  { cx: 0, cz: 12.2, rx: 3.05, rz: 4.6 },
+  { cx: 0, cz: 0.2, rx: 11.6, rz: 10.4 },
+  { cx: -6.8, cz: 1.8, rx: 5.8, rz: 5.2 },
+  { cx: 5.8, cz: -2.2, rx: 5.4, rz: 5 },
+  { cx: 0, cz: 11.8, rx: 2.85, rz: 4.3 },
 ]
 
 export const ISLAND_HILLS = [
@@ -60,10 +61,11 @@ export const SAND_INNER = -1.85
 export const SAND_OUTER = 0.35
 export const BEACH_WIDTH = 2.35
 export const PATH_HALF = 1.05
-export const WATER_Y = -1.2
-export const CLIFF_BOTTOM_Y = -1.7
-export const SAND_SHELF_Y = 0.62
-export const GRASS_BASE_Y = 1.35
+export const WATER_Y = -1.85
+export const CLIFF_BOTTOM_Y = -2.9
+export const SAND_SHELF_Y = 0.92
+export const BEACH_LIP_Y = 0.22
+export const GRASS_BASE_Y = 1.58
 
 export const WALK_SPEED = 1.65
 export const DUMMY_SPEED = 0.9
@@ -125,31 +127,34 @@ export const VILLAGERS: Villager[] = [
 
 export const HOUSES = [
   {
-    x: 4.5,
-    z: -2.6,
-    yaw: -0.9,
+    x: 4.6,
+    z: -2.4,
+    yaw: -0.85,
     scale: 1,
-    wall: '#f6d2b0',
-    roof: '#e07a5f',
+    wall: '#f7d3b4',
+    roof: '#ef7d62',
     door: '#8b5340',
+    flower: '#f4a4c4',
   },
   {
-    x: -4.1,
-    z: -2.1,
+    x: -4.3,
+    z: -1.8,
     yaw: 0.95,
-    scale: 0.92,
+    scale: 0.94,
     wall: '#dcecc8',
     roof: '#5c8f72',
     door: '#4a6b4a',
+    flower: '#f6d56a',
   },
   {
-    x: 0.9,
-    z: -5.4,
-    yaw: 0.12,
-    scale: 0.86,
-    wall: '#f4ead4',
-    roof: '#d4a373',
+    x: 0.8,
+    z: -5.2,
+    yaw: 0.08,
+    scale: 0.88,
+    wall: '#fff1d6',
+    roof: '#d9a05c',
     door: '#7a4e32',
+    flower: '#8fd0a0',
   },
 ] as const
 
@@ -157,7 +162,7 @@ export const COLORS = {
   sky: '#9fd6ea',
   water: '#4e9bb3',
   sand: '#e8cc8a',
-  cliff: '#c4a06a',
+  cliff: '#9a7040',
   grass: '#7db85c',
   path: '#c9a36a',
   foliage: '#3f7a48',

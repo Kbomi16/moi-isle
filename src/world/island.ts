@@ -10,6 +10,7 @@ import {
   SAND_INNER,
   SAND_OUTER,
   SAND_SHELF_Y,
+  BEACH_LIP_Y,
   VILLAGE_PLAZA,
   WALK_INSET,
   WATER_Y,
@@ -111,7 +112,7 @@ export const groundHeight = (x: number, z: number): number => {
 
   if (sdf > SAND_OUTER) {
     const beachT = (sdf - SAND_OUTER) / BEACH_WIDTH
-    return SAND_SHELF_Y * (1 - beachT) + WATER_Y * beachT
+    return SAND_SHELF_Y * (1 - beachT) + BEACH_LIP_Y * beachT
   }
 
   const sandSpan = SAND_OUTER - SAND_INNER

@@ -58,7 +58,12 @@ function Village() {
           rotation={[0, house.yaw, 0]}
           scale={house.scale}
         >
-          <Cottage door={house.door} roof={house.roof} wall={house.wall} />
+          <Cottage
+            door={house.door}
+            flower={house.flower}
+            roof={house.roof}
+            wall={house.wall}
+          />
         </group>
       ))}
     </group>

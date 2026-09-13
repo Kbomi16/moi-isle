@@ -8,9 +8,12 @@ import {
   pathDistance,
 } from './island.ts'
 import {
+  BEACH_LIP_Y,
+  CLIFF_BOTTOM_Y,
   HOUSES,
   PLAYER_SPAWN,
   SAND_INNER,
+  SAND_OUTER,
   VILLAGE_PLAZA,
   WATER_Y,
 } from './constants.ts'
@@ -55,6 +58,14 @@ describe('island', () => {
   })
 
   test('섬 가운데는 물 위로 두껍게 올라온다', () => {
-    expect(groundHeight(0, 0) - WATER_Y).toBeGreaterThan(2.2)
+    expect(groundHeight(0, 0) - WATER_Y).toBeGreaterThan(2.8)
+  })
+
+  test('바깥 모래는 물에 잠기지 않고 절벽은 물 아래로 내려간다', () => {
+    const beach = { x: 12.6, z: 0.4 }
+    expect(islandSignedDistance(beach.x, beach.z)).toBeGreaterThan(SAND_OUTER)
+    expect(groundHeight(beach.x, beach.z)).toBeGreaterThan(WATER_Y + 1.4)
+    expect(groundHeight(beach.x, beach.z)).toBeGreaterThan(BEACH_LIP_Y - 0.05)
+    expect(CLIFF_BOTTOM_Y).toBeLessThan(WATER_Y - 0.8)
   })
 })

@@ -25,9 +25,9 @@ export function IsleCamera({ follow, target, cameraYaw }: IsleCameraProps) {
       return
     }
 
-    const distance = 28
-    camera.position.set(Math.sin(yaw) * distance, 14, Math.cos(yaw) * distance)
-    camera.lookAt(0, 1.25, 0)
+    const distance = 24
+    camera.position.set(Math.sin(yaw) * distance, 11, Math.cos(yaw) * distance)
+    camera.lookAt(0, 0.4, 0)
   })
 
   return null

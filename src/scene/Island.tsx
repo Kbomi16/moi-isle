@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { BufferAttribute, BufferGeometry, Color } from 'three'
+import { BufferAttribute, BufferGeometry, Color, DoubleSide } from 'three'
 import {
   BEACH_WIDTH,
   CLIFF_BOTTOM_Y,
@@ -66,7 +66,7 @@ const createIslandGeometry = (): BufferGeometry => {
         { x: x1, z: z1 },
         { x: x0, z: z1 },
       ]
-      if (!corners.some((corner) => isMeshed(corner.x, corner.z))) {
+      if (!corners.every((corner) => isMeshed(corner.x, corner.z))) {
         continue
       }
 
@@ -83,17 +83,26 @@ const createIslandGeometry = (): BufferGeometry => {
       if (!first || !second || !third || !fourth) {
         continue
       }
-      pushQuad(positions, colors, color, first, second, third, fourth, hex)
+      pushQuad(positions, colors, color, first, fourth, third, second, hex)
+      pushQuad(
+        positions,
+        colors,
+        color,
+        { x: first.x, y: CLIFF_BOTTOM_Y, z: first.z },
+        { x: second.x, y: CLIFF_BOTTOM_Y, z: second.z },
+        { x: third.x, y: CLIFF_BOTTOM_Y, z: third.z },
+        { x: fourth.x, y: CLIFF_BOTTOM_Y, z: fourth.z },
+        COLORS.cliff,
+      )
 
-      const land = corners.map((corner) => isMeshed(corner.x, corner.z))
       const edges = [
-        { a: first, b: second, outward: !land[1] },
-        { a: second, b: third, outward: !land[2] },
-        { a: third, b: fourth, outward: !land[3] },
-        { a: fourth, b: first, outward: !land[0] },
+        { a: first, b: second, ox: 0, oz: -step },
+        { a: second, b: third, ox: step, oz: 0 },
+        { a: third, b: fourth, ox: 0, oz: step },
+        { a: fourth, b: first, ox: -step, oz: 0 },
       ]
       for (const edge of edges) {
-        if (!edge.outward) {
+        if (isMeshed(edge.a.x + edge.ox, edge.a.z + edge.oz)) {
           continue
         }
         pushQuad(
@@ -135,7 +144,7 @@ export function Island() {
         />
       </mesh>
       <mesh geometry={geometry} receiveShadow castShadow>
-        <meshStandardMaterial vertexColors roughness={0.9} />
+        <meshStandardMaterial vertexColors roughness={0.9} side={DoubleSide} />
       </mesh>
     </group>
   )
