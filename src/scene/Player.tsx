@@ -1,20 +1,21 @@
 import { useFrame } from '@react-three/fiber'
 import { useKeyboardControls } from '@react-three/drei'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { RefObject } from 'react'
 import type { Group } from 'three'
-import { PLAYER_LOOK, WALK_SPEED } from '../world/constants.ts'
+import { WALK_SPEED } from '../world/constants.ts'
 import { stepWalk } from '../world/movement.ts'
 import { groundHeight } from '../world/island.ts'
 import type { Pose } from '../world/constants.ts'
-import { CharacterBody } from './CharacterBody.tsx'
 import { ActorMarkup } from './ActorMarkup.tsx'
+import { LookModel } from './LookModel.tsx'
 
 type PlayerProps = {
   pose: RefObject<Pose>
   cameraYaw: RefObject<number>
   chatFocused: RefObject<boolean>
   name: string
+  lookUrl: string
   bubble: string | null
 }
 
@@ -23,9 +24,12 @@ export function Player({
   cameraYaw,
   chatFocused,
   name,
+  lookUrl,
   bubble,
 }: PlayerProps) {
   const group = useRef<Group>(null)
+  const movingRef = useRef(false)
+  const [moving, setMoving] = useState(false)
   const [, getKeys] = useKeyboardControls()
 
   useFrame((_, delta) => {
@@ -53,6 +57,10 @@ export function Player({
       current.x = next.position.x
       current.z = next.position.z
       current.yaw = next.yaw
+      if (next.moving !== movingRef.current) {
+        movingRef.current = next.moving
+        setMoving(next.moving)
+      }
     }
 
     if (!node) {
@@ -74,7 +82,7 @@ export function Player({
       ]}
       rotation={[0, start?.yaw ?? 0, 0]}
     >
-      <CharacterBody look={PLAYER_LOOK} />
+      <LookModel moving={moving} url={lookUrl} />
       <ActorMarkup name={name} showName={false} bubble={bubble} />
     </group>
   )

@@ -22,6 +22,7 @@ const keyMap = [
 
 type IsleCanvasProps = {
   playerName: string | null
+  lookUrl: string | null
   playerPose: RefObject<Pose>
   npcPoses: RefObject<Record<string, Pose>>
   cameraYaw: RefObject<number>
@@ -34,6 +35,7 @@ type IsleCanvasProps = {
 
 export function IsleCanvas({
   playerName,
+  lookUrl,
   playerPose,
   npcPoses,
   cameraYaw,
@@ -117,12 +119,13 @@ export function IsleCanvas({
             target={playerPose}
             cameraYaw={cameraYaw}
           />
-          {playerName ? (
+          {playerName && lookUrl ? (
             <Player
               pose={playerPose}
               cameraYaw={cameraYaw}
               chatFocused={chatFocused}
               name={playerName}
+              lookUrl={lookUrl}
               bubble={playerBubble}
             />
           ) : null}

@@ -11,6 +11,8 @@ import {
 } from './world/constants.ts'
 import { nearestListenerId, normalizeChat } from './world/chat.ts'
 import { isWithinRange } from './world/proximity.ts'
+import { lookById, lookUrl } from './world/looks.ts'
+import type { LookId } from './world/looks.ts'
 import { initialNpcPoses, initialPlayerPose } from './world/spawn.ts'
 import type { ProximityState } from './scene/ProximitySensor.tsx'
 
@@ -21,6 +23,7 @@ type Bubble = {
 
 export default function App() {
   const [nickname, setNickname] = useState<string | null>(null)
+  const [lookId, setLookId] = useState<LookId | null>(null)
   const [proximity, setProximity] = useState<ProximityState>({
     namedIds: [],
     chatId: null,
@@ -56,10 +59,11 @@ export default function App() {
     return () => window.clearInterval(timer)
   }, [])
 
-  const handleEnter = (name: string) => {
+  const handleEnter = (name: string, nextLookId: LookId) => {
     playerPose.current = initialPlayerPose()
     npcPoses.current = initialNpcPoses()
     setNickname(name)
+    setLookId(nextLookId)
   }
 
   const handleFocusChange = useCallback((focused: boolean) => {
@@ -117,6 +121,7 @@ export default function App() {
         npcPoses={npcPoses}
         onProximity={setProximity}
         playerBubble={playerBubble?.text ?? null}
+        lookUrl={lookId ? lookUrl(lookById(lookId).file) : null}
         playerName={nickname}
         playerPose={playerPose}
       />
