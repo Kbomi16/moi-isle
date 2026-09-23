@@ -78,6 +78,15 @@ Kenney 에셋은 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)�
 
 공통: `Textures/colormap.png` — 위 캐릭터 GLB가 참조하는 팔레트
 
+## 교보 손글씨 2025 이유빈
+
+- 제작·배포: (주)교보문고 · [손글쓰기문화확산캠페인](https://store.kyobobook.co.kr/handwriting/font)
+- 라이선스: 교보문고 손글씨 폰트 페이지 「라이선스 보기」 (개인·기업 무료, 웹·영상 등 사용 가능)
+- 로컬 경로: `public/fonts/KyoboHandwriting2025lyb.otf`
+- 라이선스 메모: `public/fonts/LICENSE-kyobo-handwriting-2025.txt`
+
+화면 UI 전체(입장·HUD·채팅·3D 말풍선·이름표)에 self-host로 쓴다.
+
 ## 지형과 집
 
 섬은 풀밭이 물 위에 두껍게 올라오고, 모래 턱이 물에 잠기지 않으며, 절벽이 물 아래로 내려가게 만든다.  
