@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Kyobo Handwriting 2025';
+  src: url('/fonts/KyoboHandwriting2025lyb.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --sky: #9fd6ea;
   --water: #4e9bb3;
@@ -5,6 +13,7 @@
   --paper-edge: #d7c7a8;
   --ink: #3d4a3c;
   --ink-soft: #5c6b58;
+  --font-hand: 'Kyobo Handwriting 2025', 'Apple SD Gothic Neo', sans-serif;
 }
 
 html,
@@ -14,11 +23,11 @@ body,
   width: 100%;
   height: 100%;
   overflow: hidden;
+  font-family: var(--font-hand);
 }
 
 body {
   color: var(--ink);
-  font-family: 'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif;
   background: var(--sky);
 }
 
@@ -46,7 +55,6 @@ input {
   cursor: grabbing;
 }
 
-.gate,
 .hud,
 .chat {
   position: absolute;
@@ -55,66 +63,171 @@ input {
 }
 
 .gate {
-  left: 50%;
-  bottom: 7vh;
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-  width: min(18rem, calc(100% - 2rem));
-  transform: translateX(-50%);
-  padding: 0.9rem 0.95rem 0.85rem;
-  border: 1px solid var(--paper-edge);
-  border-radius: 1.35rem;
-  background: color-mix(in srgb, var(--paper) 94%, white);
-  box-shadow: 0 10px 30px rgb(61 74 60 / 12%);
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 1.5rem;
+  overflow: auto;
+  pointer-events: auto;
+  background:
+    radial-gradient(ellipse 42% 18% at 32% 72%, #8fce9a 0%, transparent 72%),
+    linear-gradient(180deg, var(--sky) 0%, #d7efd4 58%, #8fb89a 100%);
+}
+
+.gate-panel {
+  display: grid;
+  grid-template-areas:
+    'copy copy'
+    'hero card';
+  grid-template-columns: minmax(16rem, 1fr) minmax(16rem, 22rem);
+  gap: 1.6rem 2.4rem;
+  align-items: center;
+  width: min(52rem, 100%);
+}
+
+.gate-copy {
+  grid-area: copy;
 }
 
 .gate-title,
-.gate-look-name {
+.gate-lead,
+.gate-look-name,
+.gate-error {
   margin: 0;
 }
 
 .gate-title {
-  font-size: 1.15rem;
-  text-align: center;
+  font-size: 2.6rem;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
-.gate-looks {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.gate-looks legend {
-  padding: 0;
+.gate-lead {
+  margin-top: 0.45rem;
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: 1rem;
+}
+
+.gate-hero {
+  grid-area: hero;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
 }
 
 .gate-look-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.6rem;
 }
 
 .gate-preview {
-  width: 4.6rem;
-  height: 4.6rem;
-  object-fit: contain;
-  image-rendering: pixelated;
-  border-radius: 0.8rem;
-  background: #dff3c8;
+  width: 12.5rem;
+  height: 12.5rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 78%, #c6e7a4 0 34%, transparent 35%),
+    #e7f6d4;
+  box-shadow: 0 1.1rem 0 -0.55rem #6a9a62;
+}
+
+.gate-preview canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .gate-look-name {
-  margin-top: 0.25rem;
   color: var(--ink-soft);
-  font-size: 0.82rem;
-  text-align: center;
+  font-size: 0.95rem;
 }
 
-.gate input,
+.gate-card {
+  grid-area: card;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.2rem 1.25rem 1.15rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 1.4rem;
+  background: color-mix(in srgb, var(--paper) 94%, white);
+  box-shadow: 0 16px 40px rgb(61 74 60 / 12%);
+}
+
+.gate-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.gate-field span,
+.gate-roles legend {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+.gate-roles {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.gate-roles legend {
+  padding: 0;
+  margin-bottom: 0.4rem;
+}
+
+.gate-role-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.gate-role {
+  position: relative;
+  padding: 0.38rem 0.8rem;
+  border: 1px solid var(--paper-edge);
+  border-radius: 999px;
+  background: color-mix(in srgb, white 70%, var(--paper));
+  cursor: pointer;
+}
+
+.gate-role input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.gate-role:has(:checked) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.gate-role:has(:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.gate-error {
+  color: #8a4b3a;
+  font-size: 0.82rem;
+}
+
 .chat input {
   width: 10.5rem;
   padding: 0.35rem 0.15rem;
@@ -123,16 +236,17 @@ input {
   outline: none;
 }
 
-.gate input {
+.gate-field input {
   width: 100%;
-  padding: 0.45rem 0.7rem;
+  box-sizing: border-box;
+  padding: 0.55rem 0.75rem;
   border: 1px solid var(--paper-edge);
   border-radius: 999px;
   background: color-mix(in srgb, white 70%, var(--paper));
-  text-align: center;
+  outline: none;
 }
 
-.gate input::placeholder,
+.gate-field input::placeholder,
 .chat input::placeholder {
   color: var(--ink-soft);
 }
@@ -159,10 +273,41 @@ input {
 }
 
 .gate button:focus-visible,
-.gate input:focus-visible,
+.gate-field input:focus-visible,
 .chat input:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+}
+
+.hud-role {
+  margin-left: 0.45rem;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 720px) {
+  .gate {
+    place-items: start center;
+    padding: 1.25rem 1rem 1.5rem;
+  }
+
+  .gate-panel {
+    grid-template-areas:
+      'copy'
+      'hero'
+      'card';
+    grid-template-columns: 1fr;
+    gap: 1.1rem;
+  }
+
+  .gate-title {
+    font-size: 2.1rem;
+  }
+
+  .gate-preview {
+    width: 9.5rem;
+    height: 9.5rem;
+  }
 }
 
 .hud {
@@ -203,6 +348,11 @@ input {
   text-align: center;
 }
 
+.actor-html,
+.actor-markup {
+  font-family: var(--font-hand);
+}
+
 .actor-markup {
   display: flex;
   flex-direction: column;
@@ -217,7 +367,7 @@ input {
   border-radius: 10px 10px 10px 3px;
   background: var(--paper);
   color: var(--ink);
-  font-size: 0.82rem;
+  font-size: 0.7rem;
   line-height: 1.35;
   text-align: center;
 }

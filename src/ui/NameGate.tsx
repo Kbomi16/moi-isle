@@ -1,16 +1,21 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { LOOKS, lookPreviewUrl } from '../world/looks.ts'
+import { GateFigure } from './GateFigure.tsx'
+import { LOOKS, lookUrl } from '../world/looks.ts'
 import type { LookId } from '../world/looks.ts'
 import { normalizeNickname } from '../world/nickname.ts'
+import { ROLES } from '../world/roles.ts'
+import type { RoleId } from '../world/roles.ts'
 
 type NameGateProps = {
-  onEnter: (name: string, lookId: LookId) => void
+  onEnter: (name: string, lookId: LookId, roleId: RoleId) => void
 }
 
 export function NameGate({ onEnter }: NameGateProps) {
   const [value, setValue] = useState('')
   const [index, setIndex] = useState(0)
+  const [roleId, setRoleId] = useState<RoleId>(ROLES[0].id)
+  const [missingName, setMissingName] = useState(false)
   const look = LOOKS[index] ?? LOOKS[0]
 
   const handlePrev = () => {
@@ -25,46 +30,76 @@ export function NameGate({ onEnter }: NameGateProps) {
     event.preventDefault()
     const name = normalizeNickname(value)
     if (!name) {
+      setMissingName(true)
       return
     }
-    onEnter(name, look.id)
+    onEnter(name, look.id, roleId)
   }
 
   return (
     <form className="gate" onSubmit={handleSubmit}>
-      <p className="gate-title">모이섬</p>
-      <label className="gate-field">
-        <span className="sr-only">이름</span>
-        <input
-          autoComplete="nickname"
-          autoFocus
-          maxLength={10}
-          name="nickname"
-          onChange={(event) => setValue(event.currentTarget.value)}
-          placeholder="이름"
-          value={value}
-        />
-      </label>
-      <fieldset className="gate-looks">
-        <legend>모습</legend>
-        <div className="gate-look-row">
-          <button type="button" aria-label="이전 모습" onClick={handlePrev}>
-            ‹
-          </button>
-          <img
-            alt=""
-            className="gate-preview"
-            src={lookPreviewUrl(look.preview)}
-          />
-          <button type="button" aria-label="다음 모습" onClick={handleNext}>
-            ›
-          </button>
+      <div className="gate-panel">
+        <header className="gate-copy">
+          <h1 className="gate-title">모이섬</h1>
+          <p className="gate-lead">이름, 직군, 모습을 고르면 섬에 선다.</p>
+        </header>
+        <div className="gate-hero">
+          <div className="gate-look-row">
+            <button type="button" aria-label="이전 모습" onClick={handlePrev}>
+              ‹
+            </button>
+            <GateFigure url={lookUrl(look.file)} />
+            <button type="button" aria-label="다음 모습" onClick={handleNext}>
+              ›
+            </button>
+          </div>
+          <p className="gate-look-name">
+            {look.label} · {index + 1}/{LOOKS.length}
+          </p>
         </div>
-        <p className="gate-look-name">
-          {look.label} · {index + 1}/{LOOKS.length}
-        </p>
-      </fieldset>
-      <button type="submit">섬으로</button>
+        <div className="gate-card">
+          <label className="gate-field">
+            <span>이름</span>
+            <input
+              aria-invalid={missingName}
+              aria-describedby={missingName ? 'gate-name-error' : undefined}
+              autoComplete="nickname"
+              autoFocus
+              maxLength={10}
+              name="nickname"
+              onChange={(event) => {
+                setValue(event.currentTarget.value)
+                setMissingName(false)
+              }}
+              placeholder="뭐라고 부를까"
+              value={value}
+            />
+          </label>
+          {missingName ? (
+            <p className="gate-error" id="gate-name-error">
+              이름을 적어 주세요.
+            </p>
+          ) : null}
+          <fieldset className="gate-roles">
+            <legend>직군</legend>
+            <div className="gate-role-row">
+              {ROLES.map((role) => (
+                <label className="gate-role" key={role.id}>
+                  <input
+                    checked={roleId === role.id}
+                    name="role"
+                    onChange={() => setRoleId(role.id)}
+                    type="radio"
+                    value={role.id}
+                  />
+                  {role.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <button type="submit">섬으로</button>
+        </div>
+      </div>
     </form>
   )
 }
