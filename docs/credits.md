@@ -48,35 +48,26 @@ Kenney 에셋은 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)�
 
 걷기·서 있기 애니메이션이 GLB에 들어 있다.
 
-### 입장에서 고르는 모습 (`src/world/looks.ts`)
+### 입장·마을에서 고르는 모습 (`src/world/looks.ts`)
 
-| 파일 | 역할 |
+Kenney Mini Characters 키트의 캐릭터 GLB 12종을 모두 선택지에 둔다. 입장 미리보기는 GLB 3D 뷰(`GateFigure`)를 쓴다.
+
+| 파일 | 입장 라벨 |
 | --- | --- |
 | `character-female-a.glb` | 남색 |
+| `character-female-b.glb` | 분홍 |
+| `character-female-c.glb` | 노랑 |
+| `character-female-d.glb` | 민트 |
+| `character-female-e.glb` | 하늘 |
 | `character-female-f.glb` | 보라 |
+| `character-male-a.glb` | 갈색 |
 | `character-male-b.glb` | 주황 |
 | `character-male-c.glb` | 모자 |
-| `previews/character-female-a.png` | 입장 캐러셀 |
-| `previews/character-female-f.png` | 입장 캐러셀 |
-| `previews/character-male-b.png` | 입장 캐러셀 |
-| `previews/character-male-c.png` | 입장 캐러셀 |
+| `character-male-d.glb` | 파랑 |
+| `character-male-e.glb` | 빨강 |
+| `character-male-f.glb` | 초록 |
 
-### 저장만 (선택지 미연결)
-
-키트 전체 캐릭터 GLB를 두었고, 나중에 외형을 늘릴 때 쓸 수 있다.
-
-| 파일 |
-| --- |
-| `character-female-b.glb` |
-| `character-female-c.glb` |
-| `character-female-d.glb` |
-| `character-female-e.glb` |
-| `character-male-a.glb` |
-| `character-male-d.glb` |
-| `character-male-e.glb` |
-| `character-male-f.glb` |
-
-공통: `Textures/colormap.png` — 위 캐릭터 GLB가 참조하는 팔레트
+공통: `Textures/colormap.png` — 위 GLB가 참조하는 팔레트. `previews/*.png`는 키트에 일부만 있어 현재 UI에서는 쓰지 않는다.
 
 ## 교보 손글씨 2025 이유빈
 

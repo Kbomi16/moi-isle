@@ -4,6 +4,7 @@ import {
   AnimationMixer,
   Box3,
   DirectionalLight,
+  Mesh,
   PerspectiveCamera,
   Scene,
   Vector3,
@@ -52,12 +53,27 @@ export function GateFigure({ url }: GateFigureProps) {
       model.scale.setScalar(4)
       scene.add(model)
 
-      const box = new Box3().setFromObject(model)
+      model.updateMatrixWorld(true)
+      const box = new Box3()
+      model.traverse((node) => {
+        if (!(node instanceof Mesh)) {
+          return
+        }
+        node.geometry.computeBoundingBox()
+        const bounds = node.geometry.boundingBox
+        if (!bounds) {
+          return
+        }
+        box.union(bounds.clone().applyMatrix4(node.matrixWorld))
+      })
       const size = box.getSize(new Vector3())
       const center = box.getCenter(new Vector3())
-      mount.dataset.box = `${size.x.toFixed(2)},${size.y.toFixed(2)},${size.z.toFixed(2)} @ ${center.x.toFixed(2)},${center.y.toFixed(2)},${center.z.toFixed(2)}`
-      camera.position.set(0.55, 1.05, 2.35)
-      camera.lookAt(0, 0.78, 0)
+      const maxDim = Math.max(size.y, 0.01)
+      const dist = (maxDim * 1.35) / (2 * Math.tan((camera.fov * Math.PI) / 360))
+      camera.position.set(center.x + dist * 0.25, center.y, center.z + dist)
+      camera.near = Math.max(dist / 80, 0.01)
+      camera.far = dist * 12
+      camera.lookAt(center)
       camera.updateProjectionMatrix()
 
       const clip =

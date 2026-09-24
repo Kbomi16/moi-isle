@@ -11,4 +11,9 @@ describe('looks', () => {
       '/models/kenney-mini/character-female-a.glb',
     )
   })
+
+  test('키트에 둔 캐릭터 GLB를 모두 고를 수 있다', () => {
+    expect(LOOKS).toHaveLength(12)
+    expect(new Set(LOOKS.map((look) => look.file)).size).toBe(12)
+  })
 })
