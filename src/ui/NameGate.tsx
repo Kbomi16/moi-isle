@@ -6,15 +6,17 @@ import type { LookId } from '../world/looks.ts'
 import { normalizeNickname } from '../world/nickname.ts'
 import { ROLES } from '../world/roles.ts'
 import type { RoleId } from '../world/roles.ts'
+import { readGateProfile, writeGateProfile } from '../world/session.ts'
 
 type NameGateProps = {
   onEnter: (name: string, lookId: LookId, roleId: RoleId) => void
 }
 
 export function NameGate({ onEnter }: NameGateProps) {
-  const [value, setValue] = useState('')
+  const [initialProfile] = useState(() => readGateProfile())
+  const [value, setValue] = useState(initialProfile.nickname)
   const [index, setIndex] = useState(0)
-  const [roleId, setRoleId] = useState<RoleId>(ROLES[0].id)
+  const [roleId, setRoleId] = useState<RoleId>(initialProfile.roleId)
   const [missingName, setMissingName] = useState(false)
   const look = LOOKS[index] ?? LOOKS[0]
 
@@ -68,8 +70,10 @@ export function NameGate({ onEnter }: NameGateProps) {
               maxLength={10}
               name="nickname"
               onChange={(event) => {
-                setValue(event.currentTarget.value)
+                const next = event.currentTarget.value
+                setValue(next)
                 setMissingName(false)
+                writeGateProfile({ nickname: next, roleId })
               }}
               placeholder="뭐라고 부를까"
               value={value}
@@ -88,7 +92,10 @@ export function NameGate({ onEnter }: NameGateProps) {
                   <input
                     checked={roleId === role.id}
                     name="role"
-                    onChange={() => setRoleId(role.id)}
+                    onChange={() => {
+                      setRoleId(role.id)
+                      writeGateProfile({ nickname: value, roleId: role.id })
+                    }}
                     type="radio"
                     value={role.id}
                   />

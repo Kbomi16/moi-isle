@@ -15,6 +15,7 @@ import { lookById, lookUrl } from './world/looks.ts'
 import type { LookId } from './world/looks.ts'
 import { roleById } from './world/roles.ts'
 import type { RoleId } from './world/roles.ts'
+import { writeStoredProfile } from './world/session.ts'
 import { initialNpcPoses, initialPlayerPose } from './world/spawn.ts'
 import type { ProximityState } from './scene/ProximitySensor.tsx'
 
@@ -63,6 +64,7 @@ export default function App() {
   }, [])
 
   const handleEnter = (name: string, nextLookId: LookId, nextRoleId: RoleId) => {
+    writeStoredProfile(name, nextRoleId)
     playerPose.current = initialPlayerPose()
     npcPoses.current = initialNpcPoses()
     setNickname(name)
