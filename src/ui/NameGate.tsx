@@ -43,7 +43,7 @@ export function NameGate({ onEnter }: NameGateProps) {
       <div className="gate-panel">
         <header className="gate-copy">
           <h1 className="gate-title">모이섬</h1>
-          <p className="gate-lead">이름, 직군, 모습을 고르면 섬에 선다.</p>
+          <p className="gate-lead">이름, 직군, 모습을 고르면 섬 마을로 들어가요.</p>
         </header>
         <div className="gate-hero">
           <div className="gate-look-row">

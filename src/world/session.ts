@@ -1,6 +1,6 @@
 import { MAX_NICKNAME } from './constants.ts'
 import { normalizeNickname } from './nickname.ts'
-import { ROLES } from './roles.ts'
+import { normalizeRoleId, ROLES } from './roles.ts'
 import type { RoleId } from './roles.ts'
 
 const STORAGE_KEY = 'moi-isle:profile'
@@ -9,9 +9,6 @@ export type StoredProfile = {
   nickname: string
   roleId: RoleId
 }
-
-const isRoleId = (value: unknown): value is RoleId =>
-  typeof value === 'string' && ROLES.some((role) => role.id === value)
 
 const defaultProfile = (): StoredProfile => ({
   nickname: '',
@@ -39,8 +36,8 @@ export const readGateProfile = (): StoredProfile => {
         ? parsed.nickname.slice(0, MAX_NICKNAME)
         : ''
     const roleId =
-      'roleId' in parsed && isRoleId(parsed.roleId)
-        ? parsed.roleId
+      'roleId' in parsed && typeof parsed.roleId === 'string'
+        ? normalizeRoleId(parsed.roleId)
         : ROLES[0].id
 
     return { nickname, roleId }
@@ -54,7 +51,7 @@ export const writeGateProfile = (profile: StoredProfile): void => {
     return
   }
 
-  const roleId = isRoleId(profile.roleId) ? profile.roleId : ROLES[0].id
+  const roleId = normalizeRoleId(profile.roleId)
   const nickname = profile.nickname.slice(0, MAX_NICKNAME)
   sessionStorage.setItem(
     STORAGE_KEY,
@@ -67,10 +64,10 @@ export const writeStoredProfile = (
   roleId: RoleId,
 ): boolean => {
   const normalized = normalizeNickname(nickname)
-  if (!normalized || !isRoleId(roleId)) {
+  if (!normalized) {
     return false
   }
 
-  writeGateProfile({ nickname: normalized, roleId })
+  writeGateProfile({ nickname: normalized, roleId: normalizeRoleId(roleId) })
   return true
 }

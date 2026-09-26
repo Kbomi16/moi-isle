@@ -34,7 +34,7 @@ describe('session', () => {
     })
 
     writeStoredProfile('모이', 'design')
-    expect(readGateProfile()).toEqual({ nickname: '모이', roleId: 'design' })
+    expect(readGateProfile()).toEqual({ nickname: '모이', roleId: 'uiux' })
   })
 
   test('직군만 바꿔도 세션에 남긴다', () => {
@@ -43,9 +43,9 @@ describe('session', () => {
       configurable: true,
     })
 
-    writeGateProfile({ nickname: '모이', roleId: 'dev' })
-    writeGateProfile({ nickname: '모이', roleId: 'plan' })
-    expect(readGateProfile()).toEqual({ nickname: '모이', roleId: 'plan' })
+    writeGateProfile({ nickname: '모이', roleId: 'frontend' })
+    writeGateProfile({ nickname: '모이', roleId: 'pm' })
+    expect(readGateProfile()).toEqual({ nickname: '모이', roleId: 'pm' })
   })
 
   test('빈 이름은 입장 저장에 실패한다', () => {
@@ -54,6 +54,6 @@ describe('session', () => {
       configurable: true,
     })
 
-    expect(writeStoredProfile('   ', 'dev')).toBe(false)
+    expect(writeStoredProfile('   ', 'frontend')).toBe(false)
   })
 })
