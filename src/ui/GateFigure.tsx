@@ -69,7 +69,9 @@ export function GateFigure({ url }: GateFigureProps) {
       const size = box.getSize(new Vector3())
       const center = box.getCenter(new Vector3())
       const maxDim = Math.max(size.y, 0.01)
-      const dist = (maxDim * 1.35) / (2 * Math.tan((camera.fov * Math.PI) / 360))
+      const frameMargin = 2.15
+      const dist =
+        (maxDim * frameMargin) / (2 * Math.tan((camera.fov * Math.PI) / 360))
       camera.position.set(center.x + dist * 0.25, center.y, center.z + dist)
       camera.near = Math.max(dist / 80, 0.01)
       camera.far = dist * 12

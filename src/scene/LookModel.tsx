@@ -39,7 +39,7 @@ export function LookModel({ url, moving }: LookModelProps) {
   }, [actions, moving])
 
   return (
-    <group ref={group} scale={4}>
+    <group ref={group} scale={1}>
       <primitive object={cloned} />
     </group>
   )
