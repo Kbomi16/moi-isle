@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import { toast } from 'sonner'
 import { GateFigure } from './GateFigure.tsx'
 import { LOOKS, lookUrl } from '../world/looks.ts'
 import type { LookId } from '../world/looks.ts'
@@ -17,7 +18,7 @@ export function NameGate({ onEnter }: NameGateProps) {
   const [value, setValue] = useState(initialProfile.nickname)
   const [index, setIndex] = useState(0)
   const [roleId, setRoleId] = useState<RoleId>(initialProfile.roleId)
-  const [missingName, setMissingName] = useState(false)
+  const nameRef = useRef<HTMLInputElement>(null)
   const look = LOOKS[index] ?? LOOKS[0]
 
   const handlePrev = () => {
@@ -32,7 +33,8 @@ export function NameGate({ onEnter }: NameGateProps) {
     event.preventDefault()
     const name = normalizeNickname(value)
     if (!name) {
-      setMissingName(true)
+      toast('이름을 적어 주세요.')
+      nameRef.current?.focus()
       return
     }
     onEnter(name, look.id, roleId)
@@ -63,8 +65,7 @@ export function NameGate({ onEnter }: NameGateProps) {
           <label className="gate-field">
             <span>이름</span>
             <input
-              aria-invalid={missingName}
-              aria-describedby={missingName ? 'gate-name-error' : undefined}
+              ref={nameRef}
               autoComplete="nickname"
               autoFocus
               maxLength={10}
@@ -72,18 +73,12 @@ export function NameGate({ onEnter }: NameGateProps) {
               onChange={(event) => {
                 const next = event.currentTarget.value
                 setValue(next)
-                setMissingName(false)
                 writeGateProfile({ nickname: next, roleId })
               }}
               placeholder="뭐라고 부를까"
               value={value}
             />
           </label>
-          {missingName ? (
-            <p className="gate-error" id="gate-name-error">
-              이름을 적어 주세요.
-            </p>
-          ) : null}
           <fieldset className="gate-roles">
             <legend>직군</legend>
             <div className="gate-role-row">
