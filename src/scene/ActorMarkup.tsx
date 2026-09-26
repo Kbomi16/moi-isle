@@ -19,7 +19,7 @@ export function ActorMarkup({ name, showName, bubble }: ActorMarkupProps) {
     >
       <div className="flex -translate-x-1/2 -translate-y-full flex-col items-center gap-0.5 font-hand">
         {bubble ? (
-          <p className="m-0 w-max max-w-64 break-keep rounded-[10px_10px_10px_3px] border border-paper-edge bg-paper px-[0.55rem] py-[0.28rem] text-center text-[0.7rem] leading-[1.35] text-ink">
+          <p className="m-0 inline-block max-w-64 min-w-0 wrap-anywhere rounded-[10px_10px_10px_3px] border border-paper-edge bg-paper px-[0.55rem] py-[0.28rem] text-center text-[0.7rem] leading-[1.35] text-ink">
             {bubble}
           </p>
         ) : null}
