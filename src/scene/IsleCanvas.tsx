@@ -77,7 +77,7 @@ export function IsleCanvas({
 
   return (
     <div
-      className="isle-stage"
+      className="h-full w-full cursor-grab touch-none active:cursor-grabbing"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}

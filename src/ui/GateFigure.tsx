@@ -105,5 +105,11 @@ export function GateFigure({ url }: GateFigureProps) {
     }
   }, [url])
 
-  return <div className="gate-preview" ref={mountRef} aria-hidden="true" />
+  return (
+    <div
+      aria-hidden="true"
+      className="size-[12.5rem] overflow-hidden rounded-full bg-[radial-gradient(circle_at_50%_78%,#c6e7a4_0_34%,transparent_35%),#e7f6d4] shadow-[0_1.1rem_0_-0.55rem_#6a9a62] max-[720px]:size-[9.5rem] [&_canvas]:block [&_canvas]:size-full"
+      ref={mountRef}
+    />
+  )
 }

@@ -121,14 +121,14 @@ export default function App() {
 
   if (!entered) {
     return (
-      <div className="isle">
+      <div className="relative h-full w-full select-none">
         <NameGate onEnter={handleEnter} />
       </div>
     )
   }
 
   return (
-    <div className="isle">
+    <div className="relative h-full w-full select-none">
       <IsleCanvas
         cameraYaw={cameraYaw}
         chatFocused={chatFocused}
