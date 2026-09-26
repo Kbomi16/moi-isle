@@ -1,3 +1,5 @@
+import type { LookId } from './looks.ts'
+
 export type Vec2 = {
   x: number
   z: number
@@ -16,17 +18,11 @@ export type Ellipse = {
   rz: number
 }
 
-export type CharacterLook = {
-  skin: string
-  shirt: string
-  hair: string
-}
-
 export type Villager = {
   id: string
   name: string
   reply: string
-  look: CharacterLook
+  lookId: LookId
   waypoints: Vec2[]
 }
 
@@ -83,18 +79,12 @@ export const DUMMY_REPLY_MS = 800
 
 export const PLAYER_SPAWN = { x: 0.4, z: 5.2 } as const
 
-export const PLAYER_LOOK: CharacterLook = {
-  skin: '#f0c48a',
-  shirt: '#e4b56a',
-  hair: '#6b4530',
-}
-
 export const VILLAGERS: Villager[] = [
   {
     id: 'molae',
     name: '모래',
     reply: '부두에서 왔어',
-    look: { skin: '#f3d2a0', shirt: '#e8b25a', hair: '#8a5a32' },
+    lookId: 'female-c',
     waypoints: [
       { x: 0.2, z: 11.4 },
       { x: 0.4, z: 4.4 },
@@ -105,7 +95,7 @@ export const VILLAGERS: Villager[] = [
     id: 'pulip',
     name: '풀잎',
     reply: '안녕',
-    look: { skin: '#efd4a8', shirt: '#6fa86c', hair: '#3f7a48' },
+    lookId: 'male-a',
     waypoints: [
       { x: 3.2, z: -2.4 },
       { x: 1.2, z: -4.2 },
@@ -116,7 +106,7 @@ export const VILLAGERS: Villager[] = [
     id: 'joyak',
     name: '조약',
     reply: '언덕이 좋아',
-    look: { skin: '#e8c8b0', shirt: '#7aa0c4', hair: '#4d5e72' },
+    lookId: 'male-d',
     waypoints: [
       { x: -6.6, z: 2.2 },
       { x: -3.2, z: 0.4 },

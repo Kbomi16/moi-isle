@@ -1,0 +1,44 @@
+---
+description: PR 제목에 gitmoji + type 필수 (gh pr create 포함)
+alwaysApply: true
+---
+
+# PR 제목 Gitmoji
+
+이 저장소에서 **Pull Request를 만들 때 제목 맨 앞에 gitmoji를 반드시 붙인다.** 커밋 메시지와 같은 형식을 쓴다.
+
+## 형식 (필수)
+
+```text
+{gitmoji} {type}: {한국어 한 줄}
+```
+
+- `{type}` 뒤 **콜론 + 공백** (`feat:` ✅)
+- gitmoji와 type 사이 **공백**
+- **한국어**, 명사형·동사형 어미 (`~합니다` 금지)
+- 제목에 gitmoji가 없으면 PR을 만들지 말고, 제목을 고친 뒤 생성한다
+
+## 예시
+
+- `✨ feat: 캐릭터 이름표·말풍선 레이아웃 및 높이 조정`
+- `🐛 fix: Html 마크업 flex 수축으로 세로 줄바꿈 되던 문제`
+- `📝 docs: PR 스크린샷 갱신`
+
+## Gitmoji + type
+
+커밋과 동일한 기준을 따른다. 상세 매핑은 `git-commit-message` 스킬 표를 참고한다.
+
+| Gitmoji | type | 쓸 때 |
+|---------|------|--------|
+| ✨ | feat | 기능·UX 추가·개선 |
+| 🐛 | fix | 버그 수정 |
+| ♻️ | refactor | 동작 동일 리팩터 |
+| 💄 | style | UI·스타일만 |
+| 📝 | docs | 문서·기획·PR 본문 스크린샷 등 |
+| 📦 | chore | 빌드·deps·설정 |
+| ⚡️ | perf | 성능 |
+| ✅ | test | 테스트 |
+
+## gh pr create
+
+`gh pr create --title`에 위 형식 문자열 전체를 넣는다. 영문-only 제목이나 gitmoji 없는 제목은 사용하지 않는다.

@@ -37,11 +37,15 @@ export function ChatBar({ onFocusChange, onSend }: ChatBarProps) {
   }
 
   return (
-    <form className="chat" onSubmit={handleSubmit}>
-      <label className="chat-field">
+    <form
+      className="pointer-events-auto absolute bottom-[1.4rem] left-1/2 z-[2] -translate-x-1/2 rounded-full border border-paper-edge bg-[color-mix(in_srgb,var(--color-paper)_94%,white)] px-4 py-[0.4rem]"
+      onSubmit={handleSubmit}
+    >
+      <label>
         <span className="sr-only">말하기</span>
         <input
           ref={inputRef}
+          className="w-64 border-0 bg-transparent px-[0.15rem] py-[0.35rem] text-center outline-none placeholder:text-ink-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
           maxLength={MAX_CHAT}
           name="chat"
           onBlur={() => onFocusChange(false)}

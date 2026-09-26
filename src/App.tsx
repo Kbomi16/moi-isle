@@ -11,6 +11,11 @@ import {
 } from './world/constants.ts'
 import { nearestListenerId, normalizeChat } from './world/chat.ts'
 import { isWithinRange } from './world/proximity.ts'
+import { lookById, lookUrl } from './world/looks.ts'
+import type { LookId } from './world/looks.ts'
+import { roleById } from './world/roles.ts'
+import type { RoleId } from './world/roles.ts'
+import { writeStoredProfile } from './world/session.ts'
 import { initialNpcPoses, initialPlayerPose } from './world/spawn.ts'
 import type { ProximityState } from './scene/ProximitySensor.tsx'
 
@@ -21,6 +26,8 @@ type Bubble = {
 
 export default function App() {
   const [nickname, setNickname] = useState<string | null>(null)
+  const [lookId, setLookId] = useState<LookId | null>(null)
+  const [roleId, setRoleId] = useState<RoleId | null>(null)
   const [proximity, setProximity] = useState<ProximityState>({
     namedIds: [],
     chatId: null,
@@ -56,10 +63,13 @@ export default function App() {
     return () => window.clearInterval(timer)
   }, [])
 
-  const handleEnter = (name: string) => {
+  const handleEnter = (name: string, nextLookId: LookId, nextRoleId: RoleId) => {
+    writeStoredProfile(name, nextRoleId)
     playerPose.current = initialPlayerPose()
     npcPoses.current = initialNpcPoses()
     setNickname(name)
+    setLookId(nextLookId)
+    setRoleId(nextRoleId)
   }
 
   const handleFocusChange = useCallback((focused: boolean) => {
@@ -107,8 +117,18 @@ export default function App() {
     ]),
   )
 
+  const entered = nickname !== null && lookId !== null && roleId !== null
+
+  if (!entered) {
+    return (
+      <div className="relative h-full w-full select-none">
+        <NameGate onEnter={handleEnter} />
+      </div>
+    )
+  }
+
   return (
-    <div className="isle">
+    <div className="relative h-full w-full select-none">
       <IsleCanvas
         cameraYaw={cameraYaw}
         chatFocused={chatFocused}
@@ -117,19 +137,14 @@ export default function App() {
         npcPoses={npcPoses}
         onProximity={setProximity}
         playerBubble={playerBubble?.text ?? null}
+        lookUrl={lookUrl(lookById(lookId).file)}
         playerName={nickname}
         playerPose={playerPose}
       />
-      {nickname ? (
-        <>
-          <Hud name={nickname} />
-          {proximity.chatId ? (
-            <ChatBar onFocusChange={handleFocusChange} onSend={handleSend} />
-          ) : null}
-        </>
-      ) : (
-        <NameGate onEnter={handleEnter} />
-      )}
+      <Hud name={nickname} role={roleById(roleId).label} />
+      {proximity.chatId ? (
+        <ChatBar onFocusChange={handleFocusChange} onSend={handleSend} />
+      ) : null}
     </div>
   )
 }
