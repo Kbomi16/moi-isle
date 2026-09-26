@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { IsleCanvas } from './scene/IsleCanvas.tsx'
-import { ChatBar } from './ui/ChatBar.tsx'
+import { ChatPanel } from './ui/ChatPanel.tsx'
 import { Hud } from './ui/Hud.tsx'
 import { NameGate } from './ui/NameGate.tsx'
 import {
@@ -10,6 +10,11 @@ import {
   VILLAGERS,
 } from './world/constants.ts'
 import { nearestListenerId, normalizeChat } from './world/chat.ts'
+import {
+  appendChatLine,
+  createChatLineId,
+  type ChatLine,
+} from './world/chatLog.ts'
 import { isWithinRange } from './world/proximity.ts'
 import { lookById, lookUrl } from './world/looks.ts'
 import type { LookId } from './world/looks.ts'
@@ -34,6 +39,7 @@ export default function App() {
   })
   const [playerBubble, setPlayerBubble] = useState<Bubble | null>(null)
   const [npcBubbles, setNpcBubbles] = useState<Record<string, Bubble>>({})
+  const [chatLog, setChatLog] = useState<ChatLine[]>([])
 
   const playerPose = useRef(initialPlayerPose())
   const npcPoses = useRef(initialNpcPoses())
@@ -70,6 +76,7 @@ export default function App() {
     setNickname(name)
     setLookId(nextLookId)
     setRoleId(nextRoleId)
+    setChatLog([])
   }
 
   const handleFocusChange = useCallback((focused: boolean) => {
@@ -84,6 +91,14 @@ export default function App() {
 
     const now = Date.now()
     setPlayerBubble({ text, until: now + BUBBLE_MS })
+    setChatLog((prev) =>
+      appendChatLine(prev, {
+        id: createChatLineId(),
+        speaker: nickname ?? '나',
+        text,
+        at: now,
+      }),
+    )
 
     const listeners = VILLAGERS.flatMap((villager) => {
       const pose = npcPoses.current[villager.id]
@@ -103,10 +118,19 @@ export default function App() {
       if (!current || !isWithinRange(playerPose.current, current, CHAT_RANGE)) {
         return
       }
+      const replyAt = Date.now()
       setNpcBubbles((prev) => ({
         ...prev,
-        [targetId]: { text: villager.reply, until: Date.now() + BUBBLE_MS },
+        [targetId]: { text: villager.reply, until: replyAt + BUBBLE_MS },
       }))
+      setChatLog((prev) =>
+        appendChatLine(prev, {
+          id: createChatLineId(),
+          speaker: villager.name,
+          text: villager.reply,
+          at: replyAt,
+        }),
+      )
     }, DUMMY_REPLY_MS)
   }
 
@@ -142,9 +166,11 @@ export default function App() {
         playerPose={playerPose}
       />
       <Hud name={nickname} role={roleById(roleId).label} />
-      {proximity.chatId ? (
-        <ChatBar onFocusChange={handleFocusChange} onSend={handleSend} />
-      ) : null}
+      <ChatPanel
+        messages={chatLog}
+        onFocusChange={handleFocusChange}
+        onSend={handleSend}
+      />
     </div>
   )
 }
