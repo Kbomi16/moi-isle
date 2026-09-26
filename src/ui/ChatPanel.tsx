@@ -16,14 +16,38 @@ export function ChatPanel({ messages, onFocusChange, onSend }: ChatPanelProps) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Enter') {
+      const input = inputRef.current
+      if (!input) {
         return
       }
-      if (document.activeElement === inputRef.current) {
+
+      if (event.key === 'Escape') {
+        if (document.activeElement === input) {
+          event.preventDefault()
+          input.blur()
+        }
         return
+      }
+
+      if (event.key !== '/') {
+        return
+      }
+      if (document.activeElement === input) {
+        return
+      }
+      const target = event.target
+      if (target instanceof HTMLElement) {
+        const tag = target.tagName
+        if (
+          tag === 'INPUT' ||
+          tag === 'TEXTAREA' ||
+          target.isContentEditable
+        ) {
+          return
+        }
       }
       event.preventDefault()
-      inputRef.current?.focus()
+      input.focus()
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -84,7 +108,7 @@ export function ChatPanel({ messages, onFocusChange, onSend }: ChatPanelProps) {
             onBlur={() => onFocusChange(false)}
             onChange={(event) => setValue(event.currentTarget.value)}
             onFocus={() => onFocusChange(true)}
-            placeholder="말하기"
+            placeholder="말하기 (/ 입력 · Esc 나가기)"
             value={value}
           />
         </label>
