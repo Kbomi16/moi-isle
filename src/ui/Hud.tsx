@@ -11,6 +11,16 @@ export function Hud({ name, role }: HudProps) {
         <span className="ml-[0.45rem] text-[0.82rem] text-ink-soft">{role}</span>
       </p>
       <p className="mt-[0.15rem] text-[0.82rem] text-ink-soft">WASD로 걷기</p>
+      <p className="mt-[0.1rem] text-[0.78rem] text-ink-soft/90">
+        <kbd className="rounded border border-paper-edge/80 bg-paper/60 px-1 py-px font-[inherit] text-[0.72rem]">
+          /
+        </kbd>{' '}
+        말하기 ·{' '}
+        <kbd className="rounded border border-paper-edge/80 bg-paper/60 px-1 py-px font-[inherit] text-[0.72rem]">
+          Esc
+        </kbd>{' '}
+        입력 취소
+      </p>
     </div>
   )
 }
