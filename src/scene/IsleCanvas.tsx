@@ -13,6 +13,7 @@ import { ProximitySensor } from './ProximitySensor.tsx'
 import type { ProximityState } from './ProximitySensor.tsx'
 import { Villagers } from './Villagers.tsx'
 
+// @react-three/drei KeyboardControls 액션 이름 → Player 이동
 const keyMap = [
   { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
   { name: 'back', keys: ['ArrowDown', 'KeyS'] },
@@ -33,6 +34,7 @@ type IsleCanvasProps = {
   onProximity: (state: ProximityState) => void
 }
 
+/** R3F Canvas — 드래그 yaw, 키보드 이동, ProximitySensor로 HUD/채팅 대상 연동 */
 export function IsleCanvas({
   playerName,
   lookUrl,
@@ -76,6 +78,7 @@ export function IsleCanvas({
   }
 
   return (
+    // 드래그로 cameraYaw 갱신 → IsleCamera·Player 걷기 방향에 사용
     <div
       className="h-full w-full cursor-grab touch-none active:cursor-grabbing"
       onPointerDown={handlePointerDown}
@@ -83,6 +86,7 @@ export function IsleCanvas({
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
     >
+      {/* WASD/방향키 → Player의 useKeyboardControls */}
       <KeyboardControls map={keyMap}>
         <Canvas
           shadows
@@ -92,8 +96,10 @@ export function IsleCanvas({
             gl.shadowMap.type = PCFSoftShadowMap
           }}
         >
+          {/* 배경·대기 원근 */}
           <color attach="background" args={[COLORS.sky]} />
           <fog attach="fog" args={[COLORS.sky, 34, 78]} />
+          {/* 낮 섬 조명 (그림자는 directionalLight) */}
           <hemisphereLight args={['#ffe7c4', '#6b8f4a', 0.72]} />
           <ambientLight intensity={0.32} />
           <directionalLight
@@ -110,16 +116,20 @@ export function IsleCanvas({
             shadow-camera-near={1}
             shadow-camera-far={70}
           />
+          {/* 지형 메시(풀·모래·언덕·경계 클램프는 world/island) */}
           <Island />
           <Suspense fallback={null}>
+            {/* Kenney GLB 집·부두·야자 등 정적 오브젝트 */}
             <Landmarks />
           </Suspense>
+          {/* 3인칭 추적 카메라 (yaw는 바깥 div 드래그) */}
           <IsleCamera
             follow={entered}
             target={playerPose}
             cameraYaw={cameraYaw}
           />
           {playerName && lookUrl ? (
+            // 입장한 플레이어 GLB + WASD + 말풍선 Html
             <Player
               pose={playerPose}
               cameraYaw={cameraYaw}
@@ -129,11 +139,13 @@ export function IsleCanvas({
               bubble={playerBubble}
             />
           ) : null}
+          {/* waypoints 순찰 주민 + 근접 시 이름표·NPC 말풍선 */}
           <Villagers
             poses={npcPoses}
             namedIds={namedIds}
             bubbles={npcBubbles}
           />
+          {/* 렌더 없음 — 매 프레임 거리 계산 후 App에 namedIds·chatId 전달 */}
           <ProximitySensor
             enabled={entered}
             player={playerPose}

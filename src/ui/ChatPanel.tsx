@@ -74,7 +74,7 @@ export function ChatPanel({ messages, onFocusChange, onSend }: ChatPanelProps) {
   return (
     <section
       aria-label="채팅"
-      className="pointer-events-auto absolute right-3 bottom-3 left-3 z-[2] mx-auto flex w-full max-w-lg min-w-0 flex-col overflow-hidden rounded-2xl border border-white/15 bg-black/45 shadow-[0_10px_28px_rgb(0_0_0/25%)] backdrop-blur-md"
+      className="pointer-events-auto absolute right-3 bottom-3 left-3 z-2 mx-auto flex w-full max-w-lg min-w-0 flex-col overflow-hidden rounded-2xl border border-white/15 bg-black/45 shadow-[0_10px_28px_rgb(0_0_0/25%)] backdrop-blur-md"
     >
       {messages.length > 0 ? (
         <ul

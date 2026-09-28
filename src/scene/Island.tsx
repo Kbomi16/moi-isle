@@ -13,9 +13,11 @@ import {
   terrainColor,
 } from '../world/island.ts'
 
+// XZ [-HALF, HALF] 구역을 GRID×GRID 셀로 쪼개 지형 메시 생성
 const GRID = 92
 const HALF = 22
 
+// world/island SDF — 모래·해변까지 포함할 때만 셀을 메시에 넣음
 const isMeshed = (x: number, z: number): boolean =>
   islandSignedDistance(x, z) <= SAND_OUTER + BEACH_WIDTH
 
@@ -33,6 +35,7 @@ const pushVertex = (
   colors.push(color.r, color.g, color.b)
 }
 
+// 사각형 a-b-c-d → 두 삼각형(6 vertex), 동일 hex vertex color
 const pushQuad = (
   positions: number[],
   colors: number[],
@@ -48,6 +51,7 @@ const pushQuad = (
   }
 }
 
+// 셀마다 윗면(terrainColor) + 바닥 절벽면 + 가장자리 측면을 vertex color로 적층
 const createIslandGeometry = (): BufferGeometry => {
   const step = (HALF * 2) / GRID
   const positions: number[] = []
@@ -66,6 +70,7 @@ const createIslandGeometry = (): BufferGeometry => {
         { x: x1, z: z1 },
         { x: x0, z: z1 },
       ]
+      // 네 모서리가 모두 섬 안일 때만 이 셀 처리
       if (!corners.every((corner) => isMeshed(corner.x, corner.z))) {
         continue
       }
@@ -83,7 +88,9 @@ const createIslandGeometry = (): BufferGeometry => {
       if (!first || !second || !third || !fourth) {
         continue
       }
+      // 지표면(언덕·길·모래 색은 groundHeight + terrainColor)
       pushQuad(positions, colors, color, first, fourth, third, second, hex)
+      // 셀 아래쪽 — 물 아래 절벽 바닥
       pushQuad(
         positions,
         colors,
@@ -95,6 +102,7 @@ const createIslandGeometry = (): BufferGeometry => {
         COLORS.cliff,
       )
 
+      // 바깥으로 한 칸 나갔을 때 메시가 끊기면 그 변에 절벽 옆면 추가
       const edges = [
         { a: first, b: second, ox: 0, oz: -step },
         { a: second, b: third, ox: step, oz: 0 },
@@ -126,11 +134,13 @@ const createIslandGeometry = (): BufferGeometry => {
   return geometry
 }
 
+/** 바다 원판 + world/island 기반 프로시저럴 지형 메시 */
 export function Island() {
   const geometry = useMemo(() => createIslandGeometry(), [])
 
   return (
     <group>
+      {/* 수평 원판 — 섬 주변 바다 */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, WATER_Y, 0]}
@@ -143,6 +153,7 @@ export function Island() {
           metalness={0.08}
         />
       </mesh>
+      {/* 프로시저럴 섬 지형 — 걷기 높이는 world/island.groundHeight와 동일 함수 */}
       <mesh geometry={geometry} receiveShadow castShadow>
         <meshStandardMaterial vertexColors roughness={0.9} side={DoubleSide} />
       </mesh>

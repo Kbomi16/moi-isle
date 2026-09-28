@@ -3,6 +3,7 @@ import { normalizeNickname } from './nickname.ts'
 import { normalizeRoleId, ROLES } from './roles.ts'
 import type { RoleId } from './roles.ts'
 
+// 탭 sessionStorage — 입장 확정 전 게이트 폼 값 + 입장 시 정규화된 프로필
 const STORAGE_KEY = 'moi-isle:profile'
 
 export type StoredProfile = {
@@ -15,6 +16,7 @@ const defaultProfile = (): StoredProfile => ({
   roleId: ROLES[0].id,
 })
 
+// NameGate 마운트 시 — JSON 파싱 실패·SSR면 기본값
 export const readGateProfile = (): StoredProfile => {
   if (typeof sessionStorage === 'undefined') {
     return defaultProfile()
@@ -46,6 +48,7 @@ export const readGateProfile = (): StoredProfile => {
   }
 }
 
+// 게이트에서 타이핑·직군 변경마다 호출 (아직 normalizeNickname 전)
 export const writeGateProfile = (profile: StoredProfile): void => {
   if (typeof sessionStorage === 'undefined') {
     return
@@ -59,6 +62,7 @@ export const writeGateProfile = (profile: StoredProfile): void => {
   )
 }
 
+// App.handleEnter — 닉네임 정규화 후 저장, 실패 시 false
 export const writeStoredProfile = (
   nickname: string,
   roleId: RoleId,

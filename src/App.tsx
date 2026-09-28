@@ -24,15 +24,18 @@ import { writeStoredProfile } from './world/session.ts'
 import { initialNpcPoses, initialPlayerPose } from './world/spawn.ts'
 import type { ProximityState } from './scene/ProximitySensor.tsx'
 
+/** 3D 말풍선에 잠깐 보여줄 텍스트와 만료 시각 */
 type Bubble = {
   text: string
   until: number
 }
 
+/** 입장 게이트 ↔ 섬(캔버스·HUD·채팅) 전환과 채팅·NPC 응답 오케스트레이션 */
 export default function App() {
   const [nickname, setNickname] = useState<string | null>(null)
   const [lookId, setLookId] = useState<LookId | null>(null)
   const [roleId, setRoleId] = useState<RoleId | null>(null)
+  // ProximitySensor → 근처 주민 이름표·채팅 대상 id
   const [proximity, setProximity] = useState<ProximityState>({
     namedIds: [],
     chatId: null,
@@ -41,11 +44,13 @@ export default function App() {
   const [npcBubbles, setNpcBubbles] = useState<Record<string, Bubble>>({})
   const [chatLog, setChatLog] = useState<ChatLine[]>([])
 
+  // R3F 쪽에서 매 프레임 갱신 — React state로 옮기지 않음
   const playerPose = useRef(initialPlayerPose())
   const npcPoses = useRef(initialNpcPoses())
   const cameraYaw = useRef(0.7)
   const chatFocused = useRef(false)
 
+  // 말풍선 until 만료 시 state 정리 (매 프레임 setState 방지)
   useEffect(() => {
     const timer = window.setInterval(() => {
       const now = Date.now()
@@ -69,7 +74,12 @@ export default function App() {
     return () => window.clearInterval(timer)
   }, [])
 
-  const handleEnter = (name: string, nextLookId: LookId, nextRoleId: RoleId) => {
+  // NameGate 제출 — sessionStorage 저장 후 월드·채팅 초기화
+  const handleEnter = (
+    name: string,
+    nextLookId: LookId,
+    nextRoleId: RoleId,
+  ) => {
     writeStoredProfile(name, nextRoleId)
     playerPose.current = initialPlayerPose()
     npcPoses.current = initialNpcPoses()
@@ -83,6 +93,7 @@ export default function App() {
     chatFocused.current = focused
   }, [])
 
+  // 채팅 전송 — 플레이어 말풍선·로그, CHAT_RANGE 안 가장 가까운 주민 더미 답장
   const handleSend = (raw: string) => {
     const text = normalizeChat(raw)
     if (!text) {
@@ -104,7 +115,11 @@ export default function App() {
       const pose = npcPoses.current[villager.id]
       return pose ? [{ id: villager.id, position: pose }] : []
     })
-    const targetId = nearestListenerId(playerPose.current, listeners, CHAT_RANGE)
+    const targetId = nearestListenerId(
+      playerPose.current,
+      listeners,
+      CHAT_RANGE,
+    )
     if (!targetId) {
       return
     }
@@ -143,6 +158,7 @@ export default function App() {
 
   const entered = nickname !== null && lookId !== null && roleId !== null
 
+  // 입장하지 않은 경우
   if (!entered) {
     return (
       <div className="relative h-full w-full select-none">
@@ -151,6 +167,7 @@ export default function App() {
     )
   }
 
+  // 입장한 경우
   return (
     <div className="relative h-full w-full select-none">
       <IsleCanvas
