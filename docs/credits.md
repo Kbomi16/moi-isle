@@ -8,6 +8,7 @@ Kenney 에셋은 [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)�
 | --- | --- | --- |
 | Pirate Kit 2.1 | [pirate-kit](https://kenney.nl/assets/pirate-kit) | `public/models/kenney-pirate/LICENSE.txt` |
 | Mini Characters 1 | [mini-characters](https://kenney.nl/assets/mini-characters) | `public/models/kenney-mini/License.txt` |
+| Furniture Kit 2.0 | [furniture-kit](https://kenney.nl/assets/furniture-kit) | `public/models/kenney-furniture/License.txt` |
 
 ## Kenney Pirate Kit
 
@@ -68,6 +69,28 @@ Kenney Mini Characters 키트의 캐릭터 GLB 12종을 모두 선택지에 둔�
 | `character-male-f.glb` | 초록 |
 
 공통: `Textures/colormap.png` — 위 GLB가 참조하는 팔레트. `previews/*.png`는 키트에 일부만 있어 현재 UI에서는 쓰지 않는다.
+
+## Kenney Furniture Kit
+
+- 제작: [Kenney](https://kenney.nl)
+- 받은 곳: [Furniture Kit](https://kenney.nl/assets/furniture-kit) (`kenney_furniture-kit.zip`의 `Models/GLTF format`)
+- 로컬 경로: `public/models/kenney-furniture/`
+
+내 방(`/room`) 가구·창문·러그에 쓴다. 공식 키트 GLB만 골랐다.
+
+| 파일 | 역할 |
+| --- | --- |
+| `bedSingle.glb` | 왼쪽 침대 |
+| `sideTable.glb` | 침대 옆 탁자 |
+| `books.glb` · `plantSmall1.glb` | 탁자 위 |
+| `bookcaseOpen.glb` | 뒤쪽 책장 |
+| `pottedPlant.glb` | 책장 옆 화분 |
+| `desk.glb` · `chairDesk.glb` | 오른쪽 책상과 의자 |
+| `computerScreen.glb` · `computerKeyboard.glb` · `lampRoundTable.glb` | 책상 위 |
+| `chairCushion.glb` | 러그 앞 의자 |
+| `lampRoundFloor.glb` | 구석 스탠드 |
+| `rugRectangle.glb` | 바닥 러그 |
+| `wallWindow.glb` | 뒷벽 창문 |
 
 ## 교보 손글씨 2025 이유빈
 
