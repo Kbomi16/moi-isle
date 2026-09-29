@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { IsleCanvas } from './scene/IsleCanvas.tsx'
+import { RoomCanvas } from './scene/RoomCanvas.tsx'
 import { ChatPanel } from './ui/ChatPanel.tsx'
+import { Guestbook } from './ui/Guestbook.tsx'
 import { Hud } from './ui/Hud.tsx'
 import { NameGate } from './ui/NameGate.tsx'
+import { RoomHud } from './ui/RoomHud.tsx'
+import { ROOM_ROUTE, useRoute } from './ui/useRoute.ts'
 import {
   BUBBLE_MS,
   CHAT_RANGE,
@@ -43,12 +47,14 @@ export default function App() {
   const [playerBubble, setPlayerBubble] = useState<Bubble | null>(null)
   const [npcBubbles, setNpcBubbles] = useState<Record<string, Bubble>>({})
   const [chatLog, setChatLog] = useState<ChatLine[]>([])
+  const [guestbookOpen, setGuestbookOpen] = useState(false)
 
   // R3F 쪽에서 매 프레임 갱신 — React state로 옮기지 않음
   const playerPose = useRef(initialPlayerPose())
   const npcPoses = useRef(initialNpcPoses())
   const cameraYaw = useRef(0.7)
   const chatFocused = useRef(false)
+  const { path, navigate } = useRoute()
 
   // 말풍선 until 만료 시 state 정리 (매 프레임 setState 방지)
   useEffect(() => {
@@ -73,6 +79,12 @@ export default function App() {
 
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    if (path !== ROOM_ROUTE) {
+      setGuestbookOpen(false)
+    }
+  }, [path])
 
   // NameGate 제출 — sessionStorage 저장 후 월드·채팅 초기화
   const handleEnter = (
@@ -170,24 +182,48 @@ export default function App() {
   // 입장한 경우
   return (
     <div className="relative h-full w-full select-none">
-      <IsleCanvas
-        cameraYaw={cameraYaw}
-        chatFocused={chatFocused}
-        namedIds={proximity.namedIds}
-        npcBubbles={npcBubbleText}
-        npcPoses={npcPoses}
-        onProximity={setProximity}
-        playerBubble={playerBubble?.text ?? null}
-        lookUrl={lookUrl(lookById(lookId).file)}
-        playerName={nickname}
-        playerPose={playerPose}
-      />
-      <Hud name={nickname} role={roleById(roleId).label} />
-      <ChatPanel
-        messages={chatLog}
-        onFocusChange={handleFocusChange}
-        onSend={handleSend}
-      />
+      {path === ROOM_ROUTE ? (
+        <>
+          <RoomCanvas />
+          <RoomHud
+            guestbookOpen={guestbookOpen}
+            name={nickname}
+            onGuestbookToggle={() => setGuestbookOpen((open) => !open)}
+            onLeave={() => navigate('/')}
+          />
+          {guestbookOpen ? (
+            <Guestbook
+              author={nickname}
+              onClose={() => setGuestbookOpen(false)}
+            />
+          ) : null}
+        </>
+      ) : (
+        <>
+          <IsleCanvas
+            cameraYaw={cameraYaw}
+            chatFocused={chatFocused}
+            namedIds={proximity.namedIds}
+            npcBubbles={npcBubbleText}
+            npcPoses={npcPoses}
+            onProximity={setProximity}
+            playerBubble={playerBubble?.text ?? null}
+            lookUrl={lookUrl(lookById(lookId).file)}
+            playerName={nickname}
+            playerPose={playerPose}
+          />
+          <Hud
+            name={nickname}
+            onOpenRoom={() => navigate(ROOM_ROUTE)}
+            role={roleById(roleId).label}
+          />
+          <ChatPanel
+            messages={chatLog}
+            onFocusChange={handleFocusChange}
+            onSend={handleSend}
+          />
+        </>
+      )}
     </div>
   )
 }
