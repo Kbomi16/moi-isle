@@ -1,8 +1,34 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { IsleCanvas } from './scene/IsleCanvas.tsx'
+import { RoomCanvas } from './scene/RoomCanvas.tsx'
 import { ChatPanel } from './ui/ChatPanel.tsx'
+import { Guestbook } from './ui/Guestbook.tsx'
 import { Hud } from './ui/Hud.tsx'
 import { NameGate } from './ui/NameGate.tsx'
+import { RoomEditor } from './ui/RoomEditor.tsx'
+import { RoomHud } from './ui/RoomHud.tsx'
+import { ROOM_ROUTE, useRoute } from './ui/useRoute.ts'
+import {
+  addRoomItem,
+  DEFAULT_ROOM_ITEMS,
+  readRoomLayout,
+  removeRoomItem,
+  rotateRoomItem,
+  updateRoomItem,
+  writeRoomLayout,
+  type RoomItem,
+  type RoomModelId,
+} from './world/roomLayout.ts'
+import {
+  readRoomStacks,
+  removePlacedStack,
+  rotatePlacedStack,
+  togglePlacedStack,
+  updatePlacedStack,
+  writeRoomStacks,
+  type PlacedStack,
+  type StackId,
+} from './world/roomStacks.ts'
 import {
   BUBBLE_MS,
   CHAT_RANGE,
@@ -43,12 +69,23 @@ export default function App() {
   const [playerBubble, setPlayerBubble] = useState<Bubble | null>(null)
   const [npcBubbles, setNpcBubbles] = useState<Record<string, Bubble>>({})
   const [chatLog, setChatLog] = useState<ChatLine[]>([])
+  const [guestbookOpen, setGuestbookOpen] = useState(false)
+  const [roomEditMode, setRoomEditMode] = useState(false)
+  const [roomItems, setRoomItems] = useState<RoomItem[]>(() => readRoomLayout())
+  const [selectedRoomItemId, setSelectedRoomItemId] = useState<string | null>(
+    null,
+  )
+  const [roomStacks, setRoomStacks] = useState<PlacedStack[]>(() =>
+    readRoomStacks(),
+  )
+  const [selectedStackId, setSelectedStackId] = useState<string | null>(null)
 
   // R3F 쪽에서 매 프레임 갱신 — React state로 옮기지 않음
   const playerPose = useRef(initialPlayerPose())
   const npcPoses = useRef(initialNpcPoses())
   const cameraYaw = useRef(0.7)
   const chatFocused = useRef(false)
+  const { path, navigate } = useRoute()
 
   // 말풍선 until 만료 시 state 정리 (매 프레임 setState 방지)
   useEffect(() => {
@@ -73,6 +110,136 @@ export default function App() {
 
     return () => window.clearInterval(timer)
   }, [])
+
+  useEffect(() => {
+    if (path !== ROOM_ROUTE) {
+      setGuestbookOpen(false)
+      setRoomEditMode(false)
+      setSelectedRoomItemId(null)
+      setSelectedStackId(null)
+      return
+    }
+    setRoomItems(readRoomLayout())
+    setRoomStacks(readRoomStacks())
+  }, [path])
+
+  const persistRoomStacks = useCallback(
+    (updater: PlacedStack[] | ((previous: PlacedStack[]) => PlacedStack[])) => {
+      setRoomStacks((previous) => {
+        const next =
+          typeof updater === 'function' ? updater(previous) : updater
+        writeRoomStacks(next)
+        return next
+      })
+    },
+    [],
+  )
+
+  const handleToggleRoomStack = useCallback(
+    (stackId: StackId) => {
+      persistRoomStacks((previous) => {
+        const next = togglePlacedStack(previous, stackId)
+        const added = next.find(
+          (entry) =>
+            !previous.some((item) => item.id === entry.id) &&
+            entry.stackId === stackId,
+        )
+        if (added) {
+          setSelectedStackId(added.id)
+          setSelectedRoomItemId(null)
+        } else {
+          setSelectedStackId((current) =>
+            previous.find((e) => e.stackId === stackId)?.id === current
+              ? null
+              : current,
+          )
+        }
+        return next
+      })
+    },
+    [persistRoomStacks],
+  )
+
+  const handleStackMove = useCallback(
+    (id: string, position: [number, number, number]) => {
+      persistRoomStacks((previous) =>
+        updatePlacedStack(previous, id, { position }),
+      )
+    },
+    [persistRoomStacks],
+  )
+
+  const handleStackRotate = useCallback(
+    (id: string, deltaRadians: number) => {
+      persistRoomStacks((previous) =>
+        rotatePlacedStack(previous, id, deltaRadians),
+      )
+    },
+    [persistRoomStacks],
+  )
+
+  const handleStackRemove = useCallback(
+    (id: string) => {
+      persistRoomStacks((previous) => removePlacedStack(previous, id))
+      setSelectedStackId(null)
+    },
+    [persistRoomStacks],
+  )
+
+  const persistRoomLayout = useCallback(
+    (updater: RoomItem[] | ((previous: RoomItem[]) => RoomItem[])) => {
+      setRoomItems((previous) => {
+        const next =
+          typeof updater === 'function' ? updater(previous) : updater
+        writeRoomLayout(next)
+        return next
+      })
+    },
+    [],
+  )
+
+  const handleRoomMove = useCallback(
+    (id: string, position: [number, number, number]) => {
+      persistRoomLayout((previous) =>
+        updateRoomItem(previous, id, { position }),
+      )
+    },
+    [persistRoomLayout],
+  )
+
+  const handleRoomAdd = useCallback(
+    (model: RoomModelId) => {
+      persistRoomLayout((previous) => {
+        const next = addRoomItem(previous, model)
+        const added = next.at(-1)
+        if (added) {
+          setSelectedRoomItemId(added.id)
+        }
+        return next
+      })
+    },
+    [persistRoomLayout],
+  )
+
+  const handleRoomRemove = useCallback(
+    (id: string) => {
+      persistRoomLayout((previous) => removeRoomItem(previous, id))
+    },
+    [persistRoomLayout],
+  )
+
+  const handleRoomRotate = useCallback(
+    (id: string, deltaRadians: number) => {
+      persistRoomLayout((previous) =>
+        rotateRoomItem(previous, id, deltaRadians),
+      )
+    },
+    [persistRoomLayout],
+  )
+
+  const handleRoomReset = useCallback(() => {
+    persistRoomLayout([...DEFAULT_ROOM_ITEMS])
+  }, [persistRoomLayout])
 
   // NameGate 제출 — sessionStorage 저장 후 월드·채팅 초기화
   const handleEnter = (
@@ -170,24 +337,105 @@ export default function App() {
   // 입장한 경우
   return (
     <div className="relative h-full w-full select-none">
-      <IsleCanvas
-        cameraYaw={cameraYaw}
-        chatFocused={chatFocused}
-        namedIds={proximity.namedIds}
-        npcBubbles={npcBubbleText}
-        npcPoses={npcPoses}
-        onProximity={setProximity}
-        playerBubble={playerBubble?.text ?? null}
-        lookUrl={lookUrl(lookById(lookId).file)}
-        playerName={nickname}
-        playerPose={playerPose}
-      />
-      <Hud name={nickname} role={roleById(roleId).label} />
-      <ChatPanel
-        messages={chatLog}
-        onFocusChange={handleFocusChange}
-        onSend={handleSend}
-      />
+      {path === ROOM_ROUTE ? (
+        <>
+          <RoomCanvas
+            editMode={roomEditMode}
+            items={roomItems}
+            onMoveItem={handleRoomMove}
+            onMoveStack={handleStackMove}
+            onSelectItem={(id) => {
+              setSelectedRoomItemId(id)
+              if (id) {
+                setSelectedStackId(null)
+              }
+            }}
+            onSelectStack={(id) => {
+              setSelectedStackId(id)
+              if (id) {
+                setSelectedRoomItemId(null)
+              }
+            }}
+            selectedItemId={selectedRoomItemId}
+            selectedStackId={selectedStackId}
+            stacks={roomStacks}
+          />
+          <RoomHud
+            editMode={roomEditMode}
+            guestbookOpen={guestbookOpen}
+            name={nickname}
+            onEditToggle={() => {
+              setRoomEditMode((on) => {
+                if (on) {
+                  setSelectedRoomItemId(null)
+                  setSelectedStackId(null)
+                }
+                return !on
+              })
+            }}
+            onGuestbookToggle={() => setGuestbookOpen((open) => !open)}
+            onLeave={() => navigate('/')}
+          />
+          {roomEditMode ? (
+            <RoomEditor
+              items={roomItems}
+              onAdd={handleRoomAdd}
+              onRemove={handleRoomRemove}
+              onReset={handleRoomReset}
+              onRotate={handleRoomRotate}
+              onSelectItem={(id) => {
+                setSelectedRoomItemId(id)
+                if (id) {
+                  setSelectedStackId(null)
+                }
+              }}
+              onSelectStack={(id) => {
+                setSelectedStackId(id)
+                if (id) {
+                  setSelectedRoomItemId(null)
+                }
+              }}
+              onStackRemove={handleStackRemove}
+              onStackRotate={handleStackRotate}
+              onToggleStack={handleToggleRoomStack}
+              selectedItemId={selectedRoomItemId}
+              selectedStackId={selectedStackId}
+              stacks={roomStacks}
+            />
+          ) : null}
+          {guestbookOpen ? (
+            <Guestbook
+              author={nickname}
+              onClose={() => setGuestbookOpen(false)}
+            />
+          ) : null}
+        </>
+      ) : (
+        <>
+          <IsleCanvas
+            cameraYaw={cameraYaw}
+            chatFocused={chatFocused}
+            namedIds={proximity.namedIds}
+            npcBubbles={npcBubbleText}
+            npcPoses={npcPoses}
+            onProximity={setProximity}
+            playerBubble={playerBubble?.text ?? null}
+            lookUrl={lookUrl(lookById(lookId).file)}
+            playerName={nickname}
+            playerPose={playerPose}
+          />
+          <Hud
+            name={nickname}
+            onOpenRoom={() => navigate(ROOM_ROUTE)}
+            role={roleById(roleId).label}
+          />
+          <ChatPanel
+            messages={chatLog}
+            onFocusChange={handleFocusChange}
+            onSend={handleSend}
+          />
+        </>
+      )}
     </div>
   )
 }
