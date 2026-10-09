@@ -1,6 +1,5 @@
 import { Html } from '@react-three/drei'
 import type { ThreeEvent } from '@react-three/fiber'
-import { useThree } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
 import { Plane, Vector3 } from 'three'
@@ -14,6 +13,16 @@ import {
 
 const wallPlane = new Plane(new Vector3(0, 0, 1), -STACK_WALL_Z)
 const hitPoint = new Vector3()
+
+type PointerCaptureTarget = {
+  setPointerCapture: (pointerId: number) => void
+  hasPointerCapture: (pointerId: number) => boolean
+  releasePointerCapture: (pointerId: number) => void
+}
+
+/** R3F가 event.target을 오브젝트별 캡처 API로 바꿔 넣는다 */
+const pointerCapture = (event: ThreeEvent<PointerEvent>) =>
+  event.target as unknown as PointerCaptureTarget
 
 type RoomPlacedStackProps = {
   stack: PlacedStack
@@ -32,7 +41,6 @@ export function RoomPlacedStack({
   onMove,
   onDragActive,
 }: RoomPlacedStackProps) {
-  const gl = useThree((state) => state.gl)
   const group = useRef<Group>(null)
 
   const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
@@ -42,11 +50,11 @@ export function RoomPlacedStack({
     event.stopPropagation()
     onSelect(stack.id)
     onDragActive(true)
-    gl.domElement.setPointerCapture(event.pointerId)
+    pointerCapture(event).setPointerCapture(event.pointerId)
   }
 
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    if (!editMode || !gl.domElement.hasPointerCapture(event.pointerId)) {
+    if (!editMode || !pointerCapture(event).hasPointerCapture(event.pointerId)) {
       return
     }
     event.stopPropagation()
@@ -59,10 +67,12 @@ export function RoomPlacedStack({
   }
 
   const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
-    if (gl.domElement.hasPointerCapture(event.pointerId)) {
-      gl.domElement.releasePointerCapture(event.pointerId)
-      onDragActive(false)
+    const capture = pointerCapture(event)
+    if (!capture.hasPointerCapture(event.pointerId)) {
+      return
     }
+    capture.releasePointerCapture(event.pointerId)
+    onDragActive(false)
   }
 
   return (

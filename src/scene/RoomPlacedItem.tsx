@@ -1,5 +1,4 @@
 import type { ThreeEvent } from '@react-three/fiber'
-import { useThree } from '@react-three/fiber'
 import { useRef } from 'react'
 import type { Group } from 'three'
 import { Plane, Vector3 } from 'three'
@@ -13,6 +12,16 @@ import { ROOM_MODELS } from './roomModels.ts'
 
 const floorPlane = new Plane(new Vector3(0, 1, 0), 0)
 const hitPoint = new Vector3()
+
+type PointerCaptureTarget = {
+  setPointerCapture: (pointerId: number) => void
+  hasPointerCapture: (pointerId: number) => boolean
+  releasePointerCapture: (pointerId: number) => void
+}
+
+/** R3F가 event.target을 오브젝트별 캡처 API로 바꿔 넣는다 */
+const pointerCapture = (event: ThreeEvent<PointerEvent>) =>
+  event.target as unknown as PointerCaptureTarget
 
 type RoomPlacedItemProps = {
   item: RoomItem
@@ -31,7 +40,6 @@ export function RoomPlacedItem({
   onMove,
   onDragActive,
 }: RoomPlacedItemProps) {
-  const gl = useThree((state) => state.gl)
   const group = useRef<Group>(null)
   const dragY = useRef(item.position[1])
   const url = ROOM_MODELS[item.model]
@@ -45,11 +53,11 @@ export function RoomPlacedItem({
     onSelect(item.id)
     dragY.current = item.position[1]
     onDragActive(true)
-    gl.domElement.setPointerCapture(event.pointerId)
+    pointerCapture(event).setPointerCapture(event.pointerId)
   }
 
   const handlePointerMove = (event: ThreeEvent<PointerEvent>) => {
-    if (!editMode || !gl.domElement.hasPointerCapture(event.pointerId)) {
+    if (!editMode || !pointerCapture(event).hasPointerCapture(event.pointerId)) {
       return
     }
     event.stopPropagation()
@@ -62,10 +70,12 @@ export function RoomPlacedItem({
   }
 
   const handlePointerUp = (event: ThreeEvent<PointerEvent>) => {
-    if (gl.domElement.hasPointerCapture(event.pointerId)) {
-      gl.domElement.releasePointerCapture(event.pointerId)
-      onDragActive(false)
+    const capture = pointerCapture(event)
+    if (!capture.hasPointerCapture(event.pointerId)) {
+      return
     }
+    capture.releasePointerCapture(event.pointerId)
+    onDragActive(false)
   }
 
   return (
