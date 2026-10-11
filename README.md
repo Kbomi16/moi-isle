@@ -7,8 +7,7 @@ Three.js 소셜 마을. 게임은 없다.
 
 ## 지금 단계
 
-기획을 2026-09-20 기준으로 다시 잡았다.  
-웹소켓(Socket.IO)으로 다른 사람·대화·내 방을 맞추는 1차다. 구현은 그 기획서 순서를 따른다.
+섬의 다른 접속자·이동·`/` 말풍선은 Socket.IO로 맞춘다. 내 방 동기화(`myRoomChange`)와 남의 방 방문은 아직이다.
 
 에셋 출처는 [credits](docs/credits.md)에 있다.
 
@@ -23,8 +22,11 @@ Three.js 소셜 마을. 게임은 없다.
 
 ```bash
 bun install
+bun run server
 bun run dev
 ```
+
+`server`는 Socket.IO(`:3001`)다. Vite가 `/socket.io`를 그쪽으로 넘긴다. 다른 탭에서 같은 주소로 들어가면 서로 보인다.
 
 ```bash
 bun test
