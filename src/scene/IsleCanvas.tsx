@@ -11,7 +11,10 @@ import { Landmarks } from './Landmarks.tsx'
 import { Player } from './Player.tsx'
 import { ProximitySensor } from './ProximitySensor.tsx'
 import type { ProximityState } from './ProximitySensor.tsx'
+import { PosePublisher } from './PosePublisher.tsx'
+import { RemotePlayers } from './RemotePlayers.tsx'
 import { Villagers } from './Villagers.tsx'
+import type { IslePlayer } from '../world/realtime.ts'
 
 // @react-three/drei KeyboardControls 액션 이름 → Player 이동
 const keyMap = [
@@ -31,6 +34,9 @@ type IsleCanvasProps = {
   namedIds: string[]
   playerBubble: string | null
   npcBubbles: Record<string, string | null>
+  remotes: IslePlayer[]
+  remoteBubbles: Record<string, string | null>
+  onMove: (pose: Pose) => void
   onProximity: (state: ProximityState) => void
 }
 
@@ -45,6 +51,9 @@ export function IsleCanvas({
   namedIds,
   playerBubble,
   npcBubbles,
+  remotes,
+  remoteBubbles,
+  onMove,
   onProximity,
 }: IsleCanvasProps) {
   const dragging = useRef<number | null>(null)
@@ -145,6 +154,12 @@ export function IsleCanvas({
             namedIds={namedIds}
             bubbles={npcBubbles}
           />
+          <RemotePlayers
+            bubbles={remoteBubbles}
+            localPose={playerPose}
+            players={remotes}
+          />
+          <PosePublisher enabled={entered} onMove={onMove} pose={playerPose} />
           {/* 렌더 없음 — 매 프레임 거리 계산 후 App에 namedIds·chatId 전달 */}
           <ProximitySensor
             enabled={entered}
