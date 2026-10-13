@@ -49,6 +49,7 @@ import type { RoleId } from './world/roles.ts'
 import { writeStoredProfile } from './world/session.ts'
 import { initialNpcPoses, initialPlayerPose } from './world/spawn.ts'
 import type { ProximityState } from './scene/ProximitySensor.tsx'
+import { useIsleRealtime } from './realtime/useIsleRealtime.ts'
 
 /** 3D 말풍선에 잠깐 보여줄 텍스트와 만료 시각 */
 type Bubble = {
@@ -86,6 +87,21 @@ export default function App() {
   const cameraYaw = useRef(0.7)
   const chatFocused = useRef(false)
   const { path, navigate } = useRoute()
+  const entered = nickname !== null && lookId !== null && roleId !== null
+
+  const handleRemoteText = useCallback((line: ChatLine) => {
+    setChatLog((prev) => appendChatLine(prev, line))
+  }, [])
+
+  const { remotes, bubbles: remoteBubbles, sendMove, sendText } =
+    useIsleRealtime({
+      enabled: entered,
+      nickname,
+      lookId,
+      roleId,
+      pose: playerPose,
+      onRemoteText: handleRemoteText,
+    })
 
   // 말풍선 until 만료 시 state 정리 (매 프레임 setState 방지)
   useEffect(() => {
@@ -269,6 +285,7 @@ export default function App() {
 
     const now = Date.now()
     setPlayerBubble({ text, until: now + BUBBLE_MS })
+    sendText(text)
     setChatLog((prev) =>
       appendChatLine(prev, {
         id: createChatLineId(),
@@ -316,14 +333,19 @@ export default function App() {
     }, DUMMY_REPLY_MS)
   }
 
+  const remoteBubbleText = Object.fromEntries(
+    remotes.map((player) => [
+      player.id,
+      remoteBubbles[player.id]?.text ?? null,
+    ]),
+  )
+
   const npcBubbleText = Object.fromEntries(
     VILLAGERS.map((villager) => [
       villager.id,
       npcBubbles[villager.id]?.text ?? null,
     ]),
   )
-
-  const entered = nickname !== null && lookId !== null && roleId !== null
 
   // 입장하지 않은 경우
   if (!entered) {
@@ -421,8 +443,11 @@ export default function App() {
             onProximity={setProximity}
             playerBubble={playerBubble?.text ?? null}
             lookUrl={lookUrl(lookById(lookId).file)}
+            onMove={sendMove}
             playerName={nickname}
             playerPose={playerPose}
+            remoteBubbles={remoteBubbleText}
+            remotes={remotes}
           />
           <Hud
             name={nickname}
