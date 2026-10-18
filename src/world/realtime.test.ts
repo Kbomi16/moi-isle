@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'bun:test'
-import { parseInitialize, parseNewText, parsePose, withoutSelf } from './realtime.ts'
+import {
+  parseInitialize,
+  parseMyRoomChange,
+  parseNewText,
+  parsePose,
+  withoutSelf,
+} from './realtime.ts'
 import { dropPlayer, listPlayers, movePlayer, upsertPlayer } from '../../server/players.ts'
 import type { IslePlayer } from './realtime.ts'
 
@@ -44,6 +50,67 @@ describe('parsePose', () => {
 describe('parseNewText', () => {
   it('빈 글은 버린다', () => {
     expect(parseNewText({ text: '   ' })).toBeNull()
+  })
+})
+
+describe('parseMyRoomChange', () => {
+  it('가구와 스택만 받고 좌표는 방 안으로 당긴다', () => {
+    const parsed = parseMyRoomChange({
+      kind: 'layout',
+      items: [
+        {
+          id: 'bed-1',
+          model: 'bed',
+          position: [99, 0, 0],
+          rotationY: 0,
+        },
+      ],
+      stacks: [
+        {
+          id: 'stack-1',
+          stackId: 'react',
+          position: [0, 1.8, 0],
+          rotationY: 0,
+        },
+      ],
+    })
+    expect(parsed?.kind).toBe('layout')
+    if (parsed?.kind !== 'layout') {
+      return
+    }
+    expect(parsed.items[0]?.position[0]).toBeLessThan(3)
+    expect(parsed.stacks[0]?.position[2]).toBeCloseTo(-2.44)
+  })
+
+  it('방명록 본문이 비면 버린다', () => {
+    expect(
+      parseMyRoomChange({ kind: 'guestbook', roomId: 'owner', text: '  ' }),
+    ).toBeNull()
+    expect(
+      parseMyRoomChange({
+        kind: 'guestbook',
+        roomId: 'owner',
+        text: '  잘 보고 가요  ',
+      }),
+    ).toEqual({
+      kind: 'guestbook',
+      roomId: 'owner',
+      text: '잘 보고 가요',
+    })
+  })
+
+  it('처음 심을 방명록에서 깨진 항목은 뺀다', () => {
+    const parsed = parseMyRoomChange({
+      kind: 'guestbookSeed',
+      entries: [
+        { id: 'ok', author: '보미', text: '안녕', at: 1 },
+        { id: 'bad' },
+      ],
+    })
+    expect(parsed).toEqual({
+      kind: 'guestbookSeed',
+      entries: [{ id: 'ok', author: '보미', text: '안녕', at: 1 }],
+    })
   })
 })
 

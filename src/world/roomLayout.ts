@@ -40,6 +40,7 @@ export const ROOM_BOUNDS = {
 } as const
 
 export const DEFAULT_ROOM_SCALE = 1.9
+export const MAX_ROOM_ITEMS = 24
 
 const STORAGE_KEY = 'moi-isle:room-layout'
 
@@ -162,6 +163,15 @@ const isModelId = (value: unknown): value is RoomModelId =>
   typeof value === 'string' &&
   (ROOM_MODEL_IDS as readonly string[]).includes(value)
 
+const isFiniteAxis = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value)
+
+const isVec3 = (value: unknown): value is [number, number, number] =>
+  Array.isArray(value) && value.length === 3 && value.every(isFiniteAxis)
+
+const isShortId = (value: unknown): value is string =>
+  typeof value === 'string' && value.length > 0 && value.length <= 64
+
 const isAttachment = (value: unknown): value is RoomAttachment => {
   if (typeof value !== 'object' || value === null) {
     return false
@@ -169,13 +179,7 @@ const isAttachment = (value: unknown): value is RoomAttachment => {
   if (!('model' in value) || !('position' in value)) {
     return false
   }
-  const position = value.position
-  return (
-    isModelId(value.model) &&
-    Array.isArray(position) &&
-    position.length === 3 &&
-    position.every((axis) => typeof axis === 'number')
-  )
+  return isModelId(value.model) && isVec3(value.position)
 }
 
 const isRoomItem = (value: unknown): value is RoomItem => {
@@ -184,20 +188,22 @@ const isRoomItem = (value: unknown): value is RoomItem => {
   }
   if (
     !('id' in value) ||
-    typeof value.id !== 'string' ||
+    !isShortId(value.id) ||
     !('model' in value) ||
     !isModelId(value.model) ||
     !('position' in value) ||
-    !Array.isArray(value.position) ||
-    value.position.length !== 3 ||
-    !value.position.every((axis) => typeof axis === 'number') ||
+    !isVec3(value.position) ||
     !('rotationY' in value) ||
-    typeof value.rotationY !== 'number'
+    !isFiniteAxis(value.rotationY)
   ) {
     return false
   }
 
-  if ('scale' in value && value.scale !== undefined && typeof value.scale !== 'number') {
+  if (
+    'scale' in value &&
+    value.scale !== undefined &&
+    (!isFiniteAxis(value.scale) || value.scale <= 0 || value.scale > 8)
+  ) {
     return false
   }
 
@@ -208,6 +214,23 @@ const isRoomItem = (value: unknown): value is RoomItem => {
   }
 
   return true
+}
+
+const clampStoredItem = (item: RoomItem): RoomItem => {
+  const clamped = clampRoomPosition(item.position[0], item.position[2])
+  return {
+    ...item,
+    position: [clamped.x, item.position[1], clamped.z],
+  }
+}
+
+/** 네트워크로 들어온 가구. 배열이 아니면 null. */
+export const sanitizeRoomItems = (value: unknown): RoomItem[] | null => {
+  if (!Array.isArray(value) || value.length > MAX_ROOM_ITEMS * 4) {
+    return null
+  }
+
+  return value.filter(isRoomItem).slice(0, MAX_ROOM_ITEMS).map(clampStoredItem)
 }
 
 export const parseRoomLayout = (raw: string): RoomItem[] => {

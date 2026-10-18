@@ -1,9 +1,16 @@
 import { MAX_CHAT } from './constants.ts'
 import type { Pose } from './constants.ts'
+import {
+  normalizeGuestbookText,
+  sanitizeGuestbook,
+  type GuestbookEntry,
+} from './guestbook.ts'
 import { LOOKS } from './looks.ts'
 import type { LookId } from './looks.ts'
 import { normalizeNickname } from './nickname.ts'
 import { normalizeChat } from './chat.ts'
+import { sanitizeRoomItems, type RoomItem } from './roomLayout.ts'
+import { sanitizeRoomStacks, type PlacedStack } from './roomStacks.ts'
 import { normalizeRoleId } from './roles.ts'
 import type { RoleId } from './roles.ts'
 
@@ -16,11 +23,6 @@ export type IslePlayer = {
   pose: Pose
 }
 
-export type InitializeAck = {
-  selfId: string
-  players: IslePlayer[]
-}
-
 export type ExitNotice = {
   id: string
   nickname: string
@@ -31,6 +33,24 @@ export type TextEvent = {
   nickname: string
   text: string
   at: number
+}
+
+export type RoomSnapshot = {
+  id: string
+  items: RoomItem[]
+  stacks: PlacedStack[]
+  guestbook: GuestbookEntry[]
+}
+
+export type MyRoomChange =
+  | { kind: 'layout'; items: RoomItem[]; stacks: PlacedStack[] }
+  | { kind: 'guestbookSeed'; entries: GuestbookEntry[] }
+  | { kind: 'guestbook'; roomId: string; text: string }
+
+export type InitializeAck = {
+  selfId: string
+  players: IslePlayer[]
+  rooms: RoomSnapshot[]
 }
 
 const LOOK_IDS = new Set<string>(LOOKS.map((look) => look.id))
@@ -100,6 +120,57 @@ export const parseNewText = (value: unknown): string | null => {
     return null
   }
   return normalizeChat(value.text)
+}
+
+const isRoomId = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  value.length <= 64 &&
+  !value.includes('/')
+
+export const parseMyRoomChange = (value: unknown): MyRoomChange | null => {
+  if (typeof value !== 'object' || value === null || !('kind' in value)) {
+    return null
+  }
+
+  if (value.kind === 'layout') {
+    if (!('items' in value) || !('stacks' in value)) {
+      return null
+    }
+    const items = sanitizeRoomItems(value.items)
+    const stacks = sanitizeRoomStacks(value.stacks)
+    if (!items || !stacks) {
+      return null
+    }
+    return { kind: 'layout', items, stacks }
+  }
+
+  if (value.kind === 'guestbookSeed') {
+    if (!('entries' in value)) {
+      return null
+    }
+    const entries = sanitizeGuestbook(value.entries)
+    if (!entries) {
+      return null
+    }
+    return { kind: 'guestbookSeed', entries }
+  }
+
+  if (value.kind === 'guestbook') {
+    if (!('roomId' in value) || !('text' in value) || typeof value.text !== 'string') {
+      return null
+    }
+    if (!isRoomId(value.roomId) || value.text.length > MAX_CHAT * 8) {
+      return null
+    }
+    const text = normalizeGuestbookText(value.text)
+    if (!text) {
+      return null
+    }
+    return { kind: 'guestbook', roomId: value.roomId, text }
+  }
+
+  return null
 }
 
 export const withoutSelf = (players: IslePlayer[], selfId: string): IslePlayer[] =>
