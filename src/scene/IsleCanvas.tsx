@@ -166,6 +166,7 @@ export function IsleCanvas({
             player={playerPose}
             npcs={npcPoses}
             onProximity={onProximity}
+            remotes={remotes}
           />
         </Canvas>
       </KeyboardControls>
