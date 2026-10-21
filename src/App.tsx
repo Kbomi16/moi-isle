@@ -7,7 +7,12 @@ import { Hud } from './ui/Hud.tsx'
 import { NameGate } from './ui/NameGate.tsx'
 import { RoomEditor } from './ui/RoomEditor.tsx'
 import { RoomHud } from './ui/RoomHud.tsx'
-import { ROOM_ROUTE, useRoute } from './ui/useRoute.ts'
+import { useRoute } from './ui/useRoute.ts'
+import {
+  readGuestbook,
+  writeGuestbook,
+  type GuestbookEntry,
+} from './world/guestbook.ts'
 import {
   addRoomItem,
   DEFAULT_ROOM_ITEMS,
@@ -19,6 +24,7 @@ import {
   type RoomItem,
   type RoomModelId,
 } from './world/roomLayout.ts'
+import { parseAppRoute, visitRoomPath } from './world/routes.ts'
 import {
   readRoomStacks,
   removePlacedStack,
@@ -66,7 +72,9 @@ export default function App() {
   const [proximity, setProximity] = useState<ProximityState>({
     namedIds: [],
     chatId: null,
+    visitId: null,
   })
+  const [storedGuestbook] = useState<GuestbookEntry[]>(() => readGuestbook())
   const [playerBubble, setPlayerBubble] = useState<Bubble | null>(null)
   const [npcBubbles, setNpcBubbles] = useState<Record<string, Bubble>>({})
   const [chatLog, setChatLog] = useState<ChatLine[]>([])
@@ -86,6 +94,9 @@ export default function App() {
   const npcPoses = useRef(initialNpcPoses())
   const cameraYaw = useRef(0.7)
   const chatFocused = useRef(false)
+  const roomItemsRef = useRef(roomItems)
+  const roomStacksRef = useRef(roomStacks)
+  const publishedFor = useRef<string | null>(null)
   const { path, navigate } = useRoute()
   const entered = nickname !== null && lookId !== null && roleId !== null
 
@@ -93,15 +104,31 @@ export default function App() {
     setChatLog((prev) => appendChatLine(prev, line))
   }, [])
 
-  const { remotes, bubbles: remoteBubbles, sendMove, sendText } =
-    useIsleRealtime({
-      enabled: entered,
-      nickname,
-      lookId,
-      roleId,
-      pose: playerPose,
-      onRemoteText: handleRemoteText,
-    })
+  const {
+    selfId,
+    remotes,
+    rooms,
+    bubbles: remoteBubbles,
+    sendMove,
+    sendText,
+    sendRoom,
+    seedGuestbook,
+    sendGuestbook,
+  } = useIsleRealtime({
+    enabled: entered,
+    nickname,
+    lookId,
+    roleId,
+    pose: playerPose,
+    onRemoteText: handleRemoteText,
+  })
+
+  const route = parseAppRoute(path)
+  const visitingId =
+    route.kind === 'visit' && route.id !== selfId ? route.id : null
+  const showingOwnRoom =
+    route.kind === 'own' || (route.kind === 'visit' && route.id === selfId)
+  const inRoom = showingOwnRoom || visitingId !== null
 
   // 말풍선 until 만료 시 state 정리 (매 프레임 setState 방지)
   useEffect(() => {
@@ -128,27 +155,54 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (path !== ROOM_ROUTE) {
-      setGuestbookOpen(false)
-      setRoomEditMode(false)
-      setSelectedRoomItemId(null)
-      setSelectedStackId(null)
+    if (!selfId) {
+      publishedFor.current = null
       return
     }
-    setRoomItems(readRoomLayout())
-    setRoomStacks(readRoomStacks())
-  }, [path])
+    if (publishedFor.current === selfId) {
+      return
+    }
+    publishedFor.current = selfId
+    sendRoom(readRoomLayout(), readRoomStacks())
+    seedGuestbook(readGuestbook())
+  }, [seedGuestbook, selfId, sendRoom])
+
+  const remoteGuestbook = selfId ? rooms[selfId]?.guestbook : undefined
+  const ownGuestbook =
+    remoteGuestbook &&
+    (remoteGuestbook.length > 0 || storedGuestbook.length === 0)
+      ? remoteGuestbook
+      : storedGuestbook
+
+  useEffect(() => {
+    if (!remoteGuestbook || remoteGuestbook.length === 0) {
+      return
+    }
+    writeGuestbook(remoteGuestbook)
+  }, [remoteGuestbook])
+
+  useEffect(() => {
+    if (showingOwnRoom) {
+      return
+    }
+    setGuestbookOpen(false)
+    setRoomEditMode(false)
+    setSelectedRoomItemId(null)
+    setSelectedStackId(null)
+  }, [showingOwnRoom])
 
   const persistRoomStacks = useCallback(
     (updater: PlacedStack[] | ((previous: PlacedStack[]) => PlacedStack[])) => {
       setRoomStacks((previous) => {
         const next =
           typeof updater === 'function' ? updater(previous) : updater
+        roomStacksRef.current = next
         writeRoomStacks(next)
+        sendRoom(roomItemsRef.current, next)
         return next
       })
     },
-    [],
+    [sendRoom],
   )
 
   const handleToggleRoomStack = useCallback(
@@ -207,11 +261,13 @@ export default function App() {
       setRoomItems((previous) => {
         const next =
           typeof updater === 'function' ? updater(previous) : updater
+        roomItemsRef.current = next
         writeRoomLayout(next)
+        sendRoom(next, roomStacksRef.current)
         return next
       })
     },
-    [],
+    [sendRoom],
   )
 
   const handleRoomMove = useCallback(
@@ -347,6 +403,26 @@ export default function App() {
     ]),
   )
 
+  const visitTarget =
+    remotes.find((player) => player.id === proximity.visitId) ?? null
+  const visitedRoom = visitingId ? rooms[visitingId] : undefined
+  const viewItems = showingOwnRoom ? roomItems : (visitedRoom?.items ?? [])
+  const viewStacks = showingOwnRoom ? roomStacks : (visitedRoom?.stacks ?? [])
+  const viewGuestbook = showingOwnRoom
+    ? ownGuestbook
+    : (visitedRoom?.guestbook ?? [])
+  const hostName = showingOwnRoom
+    ? (nickname ?? '나')
+    : (remotes.find((player) => player.id === visitingId)?.nickname ?? '이웃')
+
+  const handleGuestbookSubmit = (text: string) => {
+    const roomId = visitingId ?? selfId
+    if (!roomId) {
+      return
+    }
+    sendGuestbook(roomId, text)
+  }
+
   // 입장하지 않은 경우
   if (!entered) {
     return (
@@ -359,11 +435,27 @@ export default function App() {
   // 입장한 경우
   return (
     <div className="relative h-full w-full select-none">
-      {path === ROOM_ROUTE ? (
+      {inRoom ? (
+        visitingId && !visitedRoom ? (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center">
+            <p className="m-0 text-[1.05rem]">
+              {selfId
+                ? '이 방은 지금 열려 있지 않습니다.'
+                : '방을 불러오는 중입니다.'}
+            </p>
+            <button
+              className="cursor-pointer rounded-full border border-paper-edge bg-paper/85 px-3 py-1 text-[0.82rem] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              onClick={() => navigate('/')}
+              type="button"
+            >
+              섬으로
+            </button>
+          </div>
+        ) : (
         <>
           <RoomCanvas
-            editMode={roomEditMode}
-            items={roomItems}
+            editMode={showingOwnRoom && roomEditMode}
+            items={viewItems}
             onMoveItem={handleRoomMove}
             onMoveStack={handleStackMove}
             onSelectItem={(id) => {
@@ -378,14 +470,15 @@ export default function App() {
                 setSelectedRoomItemId(null)
               }
             }}
-            selectedItemId={selectedRoomItemId}
-            selectedStackId={selectedStackId}
-            stacks={roomStacks}
+            selectedItemId={showingOwnRoom ? selectedRoomItemId : null}
+            selectedStackId={showingOwnRoom ? selectedStackId : null}
+            stacks={viewStacks}
           />
           <RoomHud
+            canEdit={showingOwnRoom}
             editMode={roomEditMode}
             guestbookOpen={guestbookOpen}
-            name={nickname}
+            name={hostName}
             onEditToggle={() => {
               setRoomEditMode((on) => {
                 if (on) {
@@ -398,7 +491,7 @@ export default function App() {
             onGuestbookToggle={() => setGuestbookOpen((open) => !open)}
             onLeave={() => navigate('/')}
           />
-          {roomEditMode ? (
+          {showingOwnRoom && roomEditMode ? (
             <RoomEditor
               items={roomItems}
               onAdd={handleRoomAdd}
@@ -427,11 +520,13 @@ export default function App() {
           ) : null}
           {guestbookOpen ? (
             <Guestbook
-              author={nickname}
+              entries={viewGuestbook}
               onClose={() => setGuestbookOpen(false)}
+              onSubmit={handleGuestbookSubmit}
             />
           ) : null}
         </>
+        )
       ) : (
         <>
           <IsleCanvas
@@ -451,8 +546,15 @@ export default function App() {
           />
           <Hud
             name={nickname}
-            onOpenRoom={() => navigate(ROOM_ROUTE)}
+            onOpenRoom={() => navigate('/room')}
+            onVisitRoom={() => {
+              if (!visitTarget) {
+                return
+              }
+              navigate(visitRoomPath(visitTarget.id))
+            }}
             role={roleById(roleId).label}
+            visitName={visitTarget?.nickname ?? null}
           />
           <ChatPanel
             messages={chatLog}

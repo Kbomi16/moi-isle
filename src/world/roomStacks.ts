@@ -92,6 +92,9 @@ const isStackId = (value: unknown): value is StackId =>
   typeof value === 'string' &&
   (STACK_IDS as readonly string[]).includes(value)
 
+const isFiniteAxis = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value)
+
 const isPlacedStack = (value: unknown): value is PlacedStack => {
   if (typeof value !== 'object' || value === null) {
     return false
@@ -99,15 +102,37 @@ const isPlacedStack = (value: unknown): value is PlacedStack => {
   return (
     'id' in value &&
     typeof value.id === 'string' &&
+    value.id.length > 0 &&
+    value.id.length <= 64 &&
     'stackId' in value &&
     isStackId(value.stackId) &&
     'position' in value &&
     Array.isArray(value.position) &&
     value.position.length === 3 &&
-    value.position.every((axis) => typeof axis === 'number') &&
+    value.position.every(isFiniteAxis) &&
     'rotationY' in value &&
-    typeof value.rotationY === 'number'
+    isFiniteAxis(value.rotationY)
   )
+}
+
+const clampStoredStack = (stack: PlacedStack): PlacedStack => {
+  const clamped = clampStackOnWall(stack.position[0], stack.position[1])
+  return {
+    ...stack,
+    position: [clamped.x, clamped.y, STACK_WALL_Z],
+  }
+}
+
+/** 네트워크로 들어온 스택. 배열이 아니면 null. */
+export const sanitizeRoomStacks = (value: unknown): PlacedStack[] | null => {
+  if (!Array.isArray(value) || value.length > MAX_ROOM_STACKS * 4) {
+    return null
+  }
+
+  return value
+    .filter(isPlacedStack)
+    .slice(0, MAX_ROOM_STACKS)
+    .map(clampStoredStack)
 }
 
 const migrateLegacyStacks = (parsed: unknown): PlacedStack[] => {

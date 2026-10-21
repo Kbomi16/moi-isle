@@ -1,7 +1,9 @@
 type HudProps = {
   name: string
   role: string
+  visitName: string | null
   onOpenRoom: () => void
+  onVisitRoom: () => void
 }
 
 function RoomIcon() {
@@ -23,7 +25,13 @@ function RoomIcon() {
   )
 }
 
-export function Hud({ name, role, onOpenRoom }: HudProps) {
+export function Hud({
+  name,
+  role,
+  visitName,
+  onOpenRoom,
+  onVisitRoom,
+}: HudProps) {
   return (
     <div className="pointer-events-auto absolute top-4 left-[1.1rem] z-2">
       <div className="flex items-center gap-2">
@@ -51,6 +59,15 @@ export function Hud({ name, role, onOpenRoom }: HudProps) {
         </kbd>{' '}
         입력 취소
       </p>
+      {visitName ? (
+        <button
+          className="mt-2 cursor-pointer rounded-full border border-paper-edge bg-paper/85 px-3 py-1 text-[0.82rem] text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          onClick={onVisitRoom}
+          type="button"
+        >
+          {visitName}의 방
+        </button>
+      ) : null}
     </div>
   )
 }

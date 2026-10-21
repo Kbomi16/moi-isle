@@ -1,17 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
-  appendGuestbookEntry,
-  createGuestbookId,
   MAX_GUESTBOOK_TEXT,
   normalizeGuestbookText,
-  readGuestbook,
-  writeGuestbook,
+  type GuestbookEntry,
 } from '../world/guestbook.ts'
 
 type GuestbookProps = {
-  author: string
+  entries: GuestbookEntry[]
   onClose: () => void
+  onSubmit: (text: string) => void
 }
 
 const formatAt = (at: number) =>
@@ -22,8 +20,7 @@ const formatAt = (at: number) =>
     minute: '2-digit',
   }).format(at)
 
-export function Guestbook({ author, onClose }: GuestbookProps) {
-  const [entries, setEntries] = useState(() => readGuestbook())
+export function Guestbook({ entries, onClose, onSubmit }: GuestbookProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -52,14 +49,7 @@ export function Guestbook({ author, onClose }: GuestbookProps) {
       return
     }
 
-    const next = appendGuestbookEntry(entries, {
-      id: createGuestbookId(),
-      author,
-      text,
-      at: Date.now(),
-    })
-    setEntries(next)
-    writeGuestbook(next)
+    onSubmit(text)
     setValue('')
   }
 
@@ -72,7 +62,7 @@ export function Guestbook({ author, onClose }: GuestbookProps) {
         <div className="min-w-0 flex-1">
           <h2 className="m-0 text-[1.15rem] font-normal">방명록</h2>
           <p className="mt-1 mb-0 text-[0.78rem] text-ink-soft">
-            이 방에 남긴 글은 이 브라우저에 저장됩니다.
+            이 글은 서버가 켜져 있는 동안 이 방에 남습니다.
           </p>
         </div>
         <button

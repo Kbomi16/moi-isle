@@ -1,3 +1,5 @@
+import { MAX_NICKNAME } from './constants.ts'
+
 export type GuestbookEntry = {
   id: string
   author: string
@@ -37,13 +39,29 @@ const isEntry = (value: unknown): value is GuestbookEntry => {
   return (
     'id' in value &&
     typeof value.id === 'string' &&
+    value.id.length > 0 &&
+    value.id.length <= 64 &&
     'author' in value &&
     typeof value.author === 'string' &&
+    value.author.length > 0 &&
+    value.author.length <= MAX_NICKNAME &&
     'text' in value &&
     typeof value.text === 'string' &&
+    value.text.length > 0 &&
+    value.text.length <= MAX_GUESTBOOK_TEXT &&
     'at' in value &&
-    typeof value.at === 'number'
+    typeof value.at === 'number' &&
+    Number.isFinite(value.at)
   )
+}
+
+/** 네트워크로 들어온 방명록. 배열이 아니면 null. */
+export const sanitizeGuestbook = (value: unknown): GuestbookEntry[] | null => {
+  if (!Array.isArray(value) || value.length > MAX_GUESTBOOK_ENTRIES * 4) {
+    return null
+  }
+
+  return value.filter(isEntry).slice(0, MAX_GUESTBOOK_ENTRIES)
 }
 
 export const parseGuestbook = (raw: string): GuestbookEntry[] => {

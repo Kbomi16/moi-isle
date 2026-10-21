@@ -5,21 +5,25 @@ import { CHAT_RANGE, NAME_RANGE, VILLAGERS } from '../world/constants.ts'
 import { isWithinRange } from '../world/proximity.ts'
 import { nearestListenerId } from '../world/chat.ts'
 import type { Pose } from '../world/constants.ts'
+import type { IslePlayer } from '../world/realtime.ts'
 
 export type ProximityState = {
   namedIds: string[]
   chatId: string | null
+  visitId: string | null
 }
 
 type ProximitySensorProps = {
   enabled: boolean
   player: RefObject<Pose>
   npcs: RefObject<Record<string, Pose>>
+  remotes: IslePlayer[]
   onProximity: (state: ProximityState) => void
 }
 
 const sameState = (left: ProximityState, right: ProximityState): boolean =>
   left.chatId === right.chatId &&
+  left.visitId === right.visitId &&
   left.namedIds.length === right.namedIds.length &&
   left.namedIds.every((id, index) => id === right.namedIds[index])
 
@@ -27,9 +31,14 @@ export function ProximitySensor({
   enabled,
   player,
   npcs,
+  remotes,
   onProximity,
 }: ProximitySensorProps) {
-  const last = useRef<ProximityState>({ namedIds: [], chatId: null })
+  const last = useRef<ProximityState>({
+    namedIds: [],
+    chatId: null,
+    visitId: null,
+  })
 
   useFrame(() => {
     const playerPose = player.current
@@ -49,8 +58,16 @@ export function ProximitySensor({
               }),
               CHAT_RANGE,
             ),
+            visitId: nearestListenerId(
+              playerPose,
+              remotes.map((remote) => ({
+                id: remote.id,
+                position: remote.pose,
+              })),
+              NAME_RANGE,
+            ),
           }
-        : { namedIds: [], chatId: null }
+        : { namedIds: [], chatId: null, visitId: null }
 
     if (sameState(next, last.current)) {
       return
